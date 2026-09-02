@@ -22,7 +22,7 @@ void addToCart(String title, String subtitle, String priceStr, String image, Bui
   globalCart.value = currentCart;
 
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('$title added to cart!'), backgroundColor: const Color(0xFF34A853), duration: const Duration(seconds: 1))
+    SnackBar(content: Text('$title added to cart!'), backgroundColor: const Color(0xFF18C5DF), duration: const Duration(seconds: 1))
   );
 }
 
@@ -45,23 +45,23 @@ class CescCommerceApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Cesc Commerce',
+      title: 'Cescrafli',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFF34A853),
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF34A853)),
+        // WARNA UTAMA DIUBAH KE CYAN SESUAI LOGO BARU
+        primaryColor: const Color(0xFF18C5DF),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF18C5DF)),
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF9F9F9),
         fontFamily: 'Roboto',
       ),
-      // MENGUBAH HALAMAN AWAL MENJADI HALAMAN LOGIN
       home: const LoginScreen(), 
     );
   }
 }
 
 // ----------------------------------------------------------------------
-// HALAMAN AUTENTIKASI (LOGIN & SIGN UP)
+// HALAMAN AUTENTIKASI (LOGIN & SIGN UP) DENGAN LOGO BARU
 // ----------------------------------------------------------------------
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -71,17 +71,30 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              const Text(
-                'Welcome Back to\nCesc Commerce',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.2),
+              // Menampilkan Gambar Logo Ikon dan Teks
+              Center(
+                child: Column(
+                  children: [
+                    Image.asset('assets/images/logo_icon.png', height: 100),
+                    const SizedBox(height: 15),
+                    Image.asset('assets/images/logo_text.png', height: 40),
+                  ],
+                ),
               ),
               const SizedBox(height: 40),
+              const Text(
+                'Welcome Back',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1A3B8B)), // Menggunakan warna biru gelap logo
+              ),
+              const SizedBox(height: 10),
+              const Text('Log in to continue shopping', style: TextStyle(color: Colors.grey)),
+              const SizedBox(height: 30),
               // Field Email
               TextField(
                 decoration: InputDecoration(
@@ -112,13 +125,12 @@ class LoginScreen extends StatelessWidget {
                   child: Text('Forgot Password?', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 40),
               // Tombol Log In
               SizedBox(
                 width: double.infinity, height: 55,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Masuk ke halaman utama jika berhasil login
                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()));
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
@@ -166,9 +178,9 @@ class SignUpScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Create an Account', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.2)),
+              const Text('Create an Account', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.2, color: Color(0xFF1A3B8B))),
               const SizedBox(height: 10),
-              const Text('Join Cesc Commerce and start shopping!', style: TextStyle(color: Colors.grey, fontSize: 16)),
+              const Text('Join Cescrafli and start shopping!', style: TextStyle(color: Colors.grey, fontSize: 16)),
               const SizedBox(height: 40),
               TextField(decoration: InputDecoration(labelText: 'Full Name', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
               const SizedBox(height: 20),
@@ -180,7 +192,6 @@ class SignUpScreen extends StatelessWidget {
                 width: double.infinity, height: 55,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Langsung masuk ke Home setelah sukses daftar
                     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()), (route) => false);
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
@@ -209,7 +220,7 @@ class ForgotPasswordScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Forgot Password', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.2)),
+              const Text('Forgot Password', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.2, color: Color(0xFF1A3B8B))),
               const SizedBox(height: 10),
               const Text('Enter your phone number or email and we will send you a code to reset your password.', style: TextStyle(color: Colors.grey, fontSize: 16)),
               const SizedBox(height: 40),
@@ -334,7 +345,7 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Good Morning,', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)), const SizedBox(height: 4), const Text('Cesc Fabregas', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87))]), GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())), child: const CircleAvatar(radius: 22, backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11')))])),
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Good Morning,', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)), const SizedBox(height: 4), const Text('Cesc Fabregas', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A3B8B)))]), GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())), child: const CircleAvatar(radius: 22, backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11')))])),
               Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16), child: Row(children: [Expanded(child: GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen())), child: Container(height: 50, padding: const EdgeInsets.symmetric(horizontal: 16), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))]), child: Row(children: [Icon(Icons.search, color: Colors.grey.shade400), const SizedBox(width: 10), Text('Search clothes...', style: TextStyle(color: Colors.grey.shade400, fontSize: 16))])))), const SizedBox(width: 12), GestureDetector(onTap: () => _showFilterSheet(context), child: Container(height: 50, width: 50, decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.tune, color: Colors.white)))])),
               Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Categories', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoryListScreen())), child: Text('See All', style: TextStyle(fontSize: 14, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)))])),
               const SizedBox(height: 16),
