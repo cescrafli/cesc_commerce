@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 void main() {
   runApp(const CescCommerceApp());
@@ -55,106 +55,1044 @@ class CescCommerceApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFF9F9F9),
         fontFamily: 'Roboto',
       ),
-      home: const LoginScreen(), 
+      home: const SplashScreen(), 
     );
   }
 }
 
 // ----------------------------------------------------------------------
-// HALAMAN AUTENTIKASI (LOGIN & SIGN UP) DENGAN LOGO BARU
-// ----------------------------------------------------------------------
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.8, end: 1.1).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    
+    // Navigate after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFE0F7FA), Color(0xFFF0F9FF), Colors.white],
+            stops: [0.0, 0.4, 1.0],
+          ),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Decorative background blurs
+            Positioned(top: -50, right: -50, child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.2), blurRadius: 100, spreadRadius: 50)]))),
+            Positioned(bottom: -50, left: -50, child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF81D4FA).withOpacity(0.2), blurRadius: 100, spreadRadius: 50)]))),
+            
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Spacer(flex: 3),
+                // Logo with pulsing glow
+                AnimatedBuilder(
+                  animation: _animation,
+                  builder: (context, child) {
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Transform.scale(
+                          scale: _animation.value,
+                          child: Container(
+                            width: 120, height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.3), blurRadius: 40, spreadRadius: 10)],
+                            ),
+                          ),
+                        ),
+                        child!,
+                      ],
+                    );
+                  },
+                  child: Container(
+                    width: 100, height: 100,
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(28), border: Border.all(color: Colors.cyan.shade100), boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.15), blurRadius: 30, offset: const Offset(0, 10))]),
+                    child: Image.asset('assets/images/logo_icon.png', fit: BoxFit.contain),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                const Text('cescrafli', style: TextStyle(color: Color(0xFF03045E), fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1)),
+                const Text('E-COMMERCE SOLUTION', style: TextStyle(color: Color(0xFF00B4D8), fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2)),
+                const SizedBox(height: 25),
+                const Text('Smart, Seamless & Modern\nE-Commerce Solution', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontSize: 14, fontWeight: FontWeight.w500, height: 1.4)),
+                const Spacer(flex: 2),
+                
+                // Loading & Footer
+                const SizedBox(
+                  width: 35, height: 35,
+                  child: CircularProgressIndicator(color: Color(0xFF00B4D8), strokeWidth: 3),
+                ),
+                const SizedBox(height: 20),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.shield_outlined, color: Color(0xFF00B4D8), size: 14),
+                    SizedBox(width: 6),
+                    Text('Secured ï¿½ Version 2.4.0', style: TextStyle(color: Colors.black45, fontSize: 12, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 40),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class OnboardingScreen extends StatelessWidget {
+  const OnboardingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAF8FF),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top Nav
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.circle, color: Color(0xFF00BCD4), size: 8),
+                        SizedBox(width: 6),
+                        Text('EN (US)', style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                    child: const Text('SKIP', style: TextStyle(color: Colors.black38, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1)),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Hero Illustration
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 280,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFE0F7FA), Colors.white, Color(0xFFF0F9FF)]),
+                        borderRadius: BorderRadius.circular(32),
+                        border: Border.all(color: Colors.cyan.shade100.withOpacity(0.6)),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, offset: const Offset(0, 10))]
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Badges
+                          Positioned(
+                            top: 20, left: 20,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(color: Colors.white.withOpacity(0.95), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
+                              child: Row(
+                                children: [
+                                  Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.amber.shade50, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.bolt, color: Colors.amber, size: 16)),
+                                  const SizedBox(width: 8),
+                                  const Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Flash Deals', style: TextStyle(color: Colors.black45, fontSize: 9, fontWeight: FontWeight.bold)),
+                                      Text('Up to 70% Off', style: TextStyle(color: Colors.black87, fontSize: 11, fontWeight: FontWeight.bold)),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            )
+                          ),
+                          Positioned(
+                            bottom: 20, right: 20,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(color: Colors.white.withOpacity(0.95), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
+                              child: Row(
+                                children: [
+                                  Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.local_shipping, color: Color(0xFF00B4D8), size: 16)),
+                                  const SizedBox(width: 8),
+                                  const Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Delivery', style: TextStyle(color: Colors.black45, fontSize: 9, fontWeight: FontWeight.bold)),
+                                      Text('Fast & Tracked', style: TextStyle(color: Colors.black87, fontSize: 11, fontWeight: FontWeight.bold)),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            )
+                          ),
+                          // Center Logo
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 90, height: 90,
+                                padding: const EdgeInsets.all(15),
+                                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), border: Border.all(color: Colors.cyan.shade100), boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.2), blurRadius: 25, offset: const Offset(0, 10))]),
+                                child: Image.asset('assets/images/logo_icon.png', fit: BoxFit.contain),
+                              ),
+                              const SizedBox(height: 15),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(color: Colors.white.withOpacity(0.8), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.cyan.shade100)),
+                                child: const Text('CESCRAFLI', style: TextStyle(color: Color(0xFF00B4D8), fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2)),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Text Content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(width: 25, height: 6, decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF00B4D8), Color(0xFF00BCD4)]), borderRadius: BorderRadius.circular(3), boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.3), blurRadius: 5)])),
+                      const SizedBox(width: 6),
+                      Container(width: 6, height: 6, decoration: BoxDecoration(color: Colors.grey.shade300, shape: BoxShape.circle)),
+                      const SizedBox(width: 6),
+                      Container(width: 6, height: 6, decoration: BoxDecoration(color: Colors.grey.shade300, shape: BoxShape.circle)),
+                    ],
+                  ),
+                  const SizedBox(height: 25),
+                  const Text('Discover Trendy Fashion,\nDelivered Instantly', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, height: 1.2, color: Color(0xFF0F172A))),
+                  const SizedBox(height: 15),
+                  const Text('Explore thousands of curated clothing collections, seamless checkouts, and real-time live GPS courier tracking.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontSize: 13, height: 1.5)),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildFeaturePill(Icons.check, '100% Original'),
+                      const SizedBox(width: 8),
+                      _buildFeaturePill(Icons.security, 'Secure Pay'),
+                      const SizedBox(width: 8),
+                      _buildFeaturePill(Icons.replay, 'Easy Return'),
+                    ],
+                  ),
+                  const SizedBox(height: 35),
+                  
+                  // Buttons
+                  SizedBox(
+                    width: double.infinity, height: 55,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00B4D8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 8,
+                        shadowColor: const Color(0xFF00B4D8).withOpacity(0.4)
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Get Started', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Already have an account? ", style: TextStyle(color: Colors.black54, fontSize: 13)),
+                      GestureDetector(
+                        onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                        child: const Text('Log In', style: TextStyle(color: Color(0xFF0096C7), fontWeight: FontWeight.bold, fontSize: 13))
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturePill(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.cyan.shade100)),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF0096C7), size: 12),
+          const SizedBox(width: 4),
+          Text(text, style: const TextStyle(color: Color(0xFF0096C7), fontSize: 11, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+}
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF0FBFF),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              // Menampilkan Gambar Logo Ikon dan Teks
-              Center(
-                child: Column(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Top Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Image.asset('assets/images/logo_icon.png', height: 100),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                      child: const Icon(Icons.arrow_back_ios_new, size: 16),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.circle, color: Color(0xFF00BCD4), size: 8),
+                          SizedBox(width: 6),
+                          Text('EN (US)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                
+                const SizedBox(height: 30),
+                
+                // Logo
+                Image.asset('assets/images/logo_icon.png', height: 80),
+                const SizedBox(height: 10),
+                
+                // Welcome Text
+                const Text('Welcome Back', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text('Sign in to continue exploring top fashion & deals', style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 13)),
+                
+                const SizedBox(height: 40),
+                
+                // Form
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Email or Phone Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
+                      child: const TextField(
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'name@domain.com or phone',
+                          hintStyle: TextStyle(color: Colors.black38),
+                          prefixIcon: Icon(Icons.alternate_email, color: Colors.black38, size: 20),
+                          prefixIconConstraints: BoxConstraints(minWidth: 40),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
+                      child: const TextField(
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½',
+                          hintStyle: TextStyle(color: Colors.black38, letterSpacing: 2),
+                          prefixIcon: Icon(Icons.lock_outline, color: Colors.black38, size: 20),
+                          prefixIconConstraints: BoxConstraints(minWidth: 40),
+                          suffixIcon: Icon(Icons.visibility_off_outlined, color: Colors.black38, size: 20),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Remember Me & Forgot Password
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(width: 20, height: 20, decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(4)), child: const Icon(Icons.check, color: Colors.white, size: 14)),
+                        const SizedBox(width: 10),
+                        const Text('Remember me', style: TextStyle(color: Colors.black87, fontSize: 13)),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+                      child: const Text('Forgot Password?', style: TextStyle(color: Color(0xFF00BCD4), fontWeight: FontWeight.bold, fontSize: 13))
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 30),
+                
+                // Login Button
+                SizedBox(
+                  width: double.infinity, height: 55,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen())),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF008CBA), // darker cyan/blue
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 5,
+                      shadowColor: const Color(0xFF00BCD4).withOpacity(0.3)
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Log In', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 30),
+                
+                // OR Divider
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Text('OR\nCONTINUE\nWITH', textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ),
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                  ],
+                ),
+                
+                const SizedBox(height: 30),
+                
+                // Social Logins
+                Row(
+                  children: [
+                    Expanded(child: Container(height: 55, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)), child: const Icon(Icons.g_mobiledata, color: Colors.red, size: 40))),
+                    const SizedBox(width: 15),
+                    Expanded(child: Container(height: 55, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)), child: const Icon(Icons.apple, size: 28))),
+                    const SizedBox(width: 15),
+                    Expanded(child: Container(height: 55, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.cyan.shade100)), child: const Icon(Icons.face, color: Color(0xFF00BCD4), size: 28))),
+                  ],
+                ),
+                
+                const SizedBox(height: 40),
+                
+                // Sign up link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Don't have an account? ", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpScreen())),
+                      child: const Text('Sign up', style: TextStyle(color: Color(0xFF00BCD4), fontWeight: FontWeight.bold, fontSize: 13))
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.lock, color: Colors.green, size: 12),
+                    const SizedBox(width: 4),
+                    Text('256-bit Secure Encryption ï¿½ Protected by Cescrafli', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Top Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: const BoxDecoration(color: Color(0xFFE8EAF6), shape: BoxShape.circle),
+                        child: const Icon(Icons.arrow_back_ios_new, size: 16),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(color: const Color(0xFFE8EAF6), borderRadius: BorderRadius.circular(20)),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.language, color: Color(0xFF006C7A), size: 14),
+                          SizedBox(width: 6),
+                          Text('EN (US)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          Icon(Icons.arrow_drop_down, size: 16),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Logo
+                Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
+                  child: Image.asset('assets/images/logo_icon.png', height: 40),
+                ),
+                const SizedBox(height: 20),
+                
+                // Welcome Text
+                const Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF111827))),
+                const SizedBox(height: 8),
+                Text('Join Cescrafli to unlock exclusive deals and\npersonalized fashion.', textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 13, height: 1.4)),
+                
+                const SizedBox(height: 30),
+                
+                // Form
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Full Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
+                      child: const TextField(
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'e.g. Cesc Fabregas',
+                          hintStyle: TextStyle(color: Colors.black26),
+                          prefixIcon: Icon(Icons.person_outline, color: Colors.black54, size: 20),
+                          prefixIconConstraints: BoxConstraints(minWidth: 40),
+                        ),
+                      ),
+                    ),
+                    
                     const SizedBox(height: 15),
-                    Image.asset('assets/images/logo_text.png', height: 40),
+                    
+                    const Text('Email Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
+                      child: const TextField(
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'name@domain.com',
+                          hintStyle: TextStyle(color: Colors.black26),
+                          prefixIcon: Icon(Icons.email_outlined, color: Colors.black54, size: 20),
+                          prefixIconConstraints: BoxConstraints(minWidth: 40),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 15),
+                    
+                    const Text('Phone Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+                            decoration: const BoxDecoration(color: Color(0xFFF0F5FF), borderRadius: BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16))),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('???? +1', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                Icon(Icons.arrow_drop_down, size: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Container(width: 1, height: 25, color: Colors.grey.shade300),
+                        Expanded(
+                          flex: 7,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            decoration: const BoxDecoration(color: Color(0xFFF0F5FF), borderRadius: BorderRadius.only(topRight: Radius.circular(16), bottomRight: Radius.circular(16))),
+                            child: const TextField(
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: '(555) 000-0000',
+                                hintStyle: TextStyle(color: Colors.black26),
+                                prefixIcon: Icon(Icons.phone_outlined, color: Colors.black54, size: 18),
+                                prefixIconConstraints: BoxConstraints(minWidth: 30),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 15),
+                    
+                    const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
+                      child: const TextField(
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Create strong password',
+                          hintStyle: TextStyle(color: Colors.black26),
+                          prefixIcon: Icon(Icons.lock_outline, color: Colors.black54, size: 20),
+                          prefixIconConstraints: BoxConstraints(minWidth: 40),
+                          suffixIcon: Icon(Icons.visibility_outlined, color: Colors.black54, size: 20),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('SECURITY LEVEL', style: TextStyle(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const SizedBox(width: 10),
+                              Expanded(child: Container(height: 4, decoration: BoxDecoration(color: Colors.indigo.shade100, borderRadius: BorderRadius.circular(2)))),
+                              const SizedBox(width: 4),
+                              Expanded(child: Container(height: 4, decoration: BoxDecoration(color: Colors.indigo.shade100, borderRadius: BorderRadius.circular(2)))),
+                              const SizedBox(width: 4),
+                              Expanded(child: Container(height: 4, decoration: BoxDecoration(color: Colors.indigo.shade100, borderRadius: BorderRadius.circular(2)))),
+                              const SizedBox(width: 10),
+                            ],
+                          ),
+                        ),
+                        const Text('Weak', style: TextStyle(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 25),
+                
+                // Terms
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(width: 20, height: 20, decoration: BoxDecoration(color: const Color(0xFFE8EAF6), borderRadius: BorderRadius.circular(4))),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black87, fontSize: 12, height: 1.4, fontFamily: 'Roboto'), // adjust font family if needed
+                          children: [
+                            const TextSpan(text: "I agree to Cescrafli's "),
+                            const TextSpan(text: "Terms of Service", style: TextStyle(color: Color(0xFF006C7A))),
+                            const TextSpan(text: " and "),
+                            const TextSpan(text: "Privacy Policy", style: TextStyle(color: Color(0xFF006C7A))),
+                          ]
+                        )
+                      )
+                    )
+                  ],
+                ),
+                
+                const SizedBox(height: 25),
+                
+                // Sign Up Button
+                SizedBox(
+                  width: double.infinity, height: 55,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen())),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF26C6DA), // Cyan
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 5,
+                      shadowColor: const Color(0xFF00BCD4).withOpacity(0.3)
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Create Account', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 25),
+                
+                // OR Divider
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Text('OR SIGN UP WITH', style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ),
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Social Logins
+                Row(
+                  children: [
+                    Expanded(child: Container(height: 55, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100)), child: const Icon(Icons.g_mobiledata, color: Colors.red, size: 40))),
+                    const SizedBox(width: 15),
+                    Expanded(child: Container(height: 55, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100)), child: const Icon(Icons.apple, color: Color(0xFF111827), size: 28))),
+                    const SizedBox(width: 15),
+                    Expanded(child: Container(height: 55, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100)), child: const Icon(Icons.fingerprint, color: Color(0xFF006C7A), size: 28))),
+                  ],
+                ),
+                
+                const SizedBox(height: 40),
+                
+                // Login link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Already have an account? ", style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Text('Log In', style: TextStyle(color: Color(0xFF006C7A), fontWeight: FontWeight.bold, fontSize: 14))
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+class ForgotPasswordScreen extends StatelessWidget {
+  const ForgotPasswordScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(Icons.arrow_back_ios_new, size: 20),
+                    ),
+                    const Text('Forgot Password', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)]),
+                      child: Image.asset('assets/images/logo_icon.png', height: 20),
+                    )
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
-              const Text(
-                'Welcome Back',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1A3B8B)), // Menggunakan warna biru gelap logo
-              ),
-              const SizedBox(height: 10),
-              const Text('Log in to continue shopping', style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 30),
-              // Field Email
-              TextField(
-                decoration: InputDecoration(
-                  labelText: 'Email or Phone Number',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+              
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    // Pills
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(color: const Color(0xFFE8F4F8), borderRadius: BorderRadius.circular(20)),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.circle, color: Color(0xFF00BFA5), size: 8),
+                              SizedBox(width: 6),
+                              Text('ACCOUNT RECOVERY', style: TextStyle(color: Color(0xFF006C7A), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.help_outline, color: Color(0xFF006C7A), size: 14),
+                              SizedBox(width: 6),
+                              Text('Need Help?', style: TextStyle(color: Color(0xFF006C7A), fontSize: 11, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 40),
+                    
+                    // Center Logo Icon
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(25),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(color: const Color(0xFF00BCD4).withOpacity(0.1), blurRadius: 40, spreadRadius: 10)
+                            ]
+                          ),
+                          child: Image.asset('assets/images/logo_icon.png', height: 60),
+                        ),
+                        Transform.translate(
+                          offset: const Offset(10, 10),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(color: Color(0xFF00BCD4), shape: BoxShape.circle),
+                            child: const Icon(Icons.restore, color: Colors.white, size: 20),
+                          ),
+                        )
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 30),
+                    
+                    const Text('Forgot Password?', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    Text('No worries! Enter your registered email address\nor phone number and we\'ll send you a verification\ncode to reset your password.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, height: 1.5)),
+                    
+                    const SizedBox(height: 30),
+                    
+                    // Tabs
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.email_outlined, color: Color(0xFF006C7A), size: 16),
+                                SizedBox(width: 8),
+                                Text('Send via Email', style: TextStyle(color: Color(0xFF006C7A), fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.sms_outlined, color: Colors.black54, size: 16),
+                                SizedBox(width: 8),
+                                Text('SMS / WhatsApp', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 30),
+                    
+                    // Form
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Email Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100)),
+                          child: const TextField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'name@domain.com',
+                              hintStyle: TextStyle(color: Colors.black26),
+                              prefixIcon: Icon(Icons.alternate_email, color: Colors.black54, size: 20),
+                              prefixIconConstraints: BoxConstraints(minWidth: 40),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const Icon(Icons.check_circle_outline, color: Colors.green, size: 14),
+                            const SizedBox(width: 6),
+                            Text('A 6-digit one-time code will be dispatched instantly.', style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+                          ],
+                        )
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 30),
+                    
+                    // Send Button
+                    SizedBox(
+                      width: double.infinity, height: 55,
+                      child: ElevatedButton(
+                        onPressed: () { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reset code sent!'))); Navigator.pop(context); },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF006C7A), // Dark Cyan
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 5,
+                          shadowColor: const Color(0xFF006C7A).withOpacity(0.3)
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Send Reset Code', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                            SizedBox(width: 8),
+                            Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 30),
+                    
+                    // Secure Info
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade100)),
+                      child: Row(
+                        children: [
+                          Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFFE8EAF6), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.verified_user_outlined, color: Color(0xFF006C7A), size: 20)),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Secure Session Reset', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                const SizedBox(height: 2),
+                                Text('Cescrafli protects your orders, wallet & prefere...', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                              ],
+                            ),
+                          )
+                        ],
+                      )
+                    ),
+                    
+                    const SizedBox(height: 40),
+                    
+                    // Bottom Links
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Remember your password? ", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Text('Log In', style: TextStyle(color: Color(0xFF006C7A), fontWeight: FontWeight.bold, fontSize: 13))
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.support_agent, color: Colors.grey, size: 14),
+                        const SizedBox(width: 6),
+                        Text('Need more help? Contact Support', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                      ],
+                    )
+                  ],
                 ),
-              ),
-              const SizedBox(height: 20),
-              // Field Password
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  suffixIcon: const Icon(Icons.visibility_off, color: Colors.grey),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).primaryColor)),
-                ),
-              ),
-              const SizedBox(height: 15),
-              // Forgot Password
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
-                  child: Text('Forgot Password?', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
-                ),
-              ),
-              const SizedBox(height: 40),
-              // Tombol Log In
-              SizedBox(
-                width: double.infinity, height: 55,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()));
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Log In', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
-                      SizedBox(width: 10),
-                      Icon(Icons.arrow_forward, color: Colors.white)
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Tombol Sign Up
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Don't have an account? ", style: TextStyle(color: Colors.grey)),
-                  GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpScreen())),
-                    child: Text('Sign up', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
-                  )
-                ],
               )
             ],
           ),
@@ -163,88 +1101,6 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-
-class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Colors.white, elevation: 0, iconTheme: const IconThemeData(color: Colors.black)),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Create an Account', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.2, color: Color(0xFF1A3B8B))),
-              const SizedBox(height: 10),
-              const Text('Join Cescrafli and start shopping!', style: TextStyle(color: Colors.grey, fontSize: 16)),
-              const SizedBox(height: 40),
-              TextField(decoration: InputDecoration(labelText: 'Full Name', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
-              const SizedBox(height: 20),
-              TextField(decoration: InputDecoration(labelText: 'Email Address', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
-              const SizedBox(height: 20),
-              TextField(obscureText: true, decoration: InputDecoration(labelText: 'Password', suffixIcon: const Icon(Icons.visibility_off, color: Colors.grey), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity, height: 55,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()), (route) => false);
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                  child: const Text('Sign Up', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ForgotPasswordScreen extends StatelessWidget {
-  const ForgotPasswordScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(backgroundColor: Colors.white, elevation: 0, iconTheme: const IconThemeData(color: Colors.black)),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Forgot Password', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, height: 1.2, color: Color(0xFF1A3B8B))),
-              const SizedBox(height: 10),
-              const Text('Enter your phone number or email and we will send you a code to reset your password.', style: TextStyle(color: Colors.grey, fontSize: 16)),
-              const SizedBox(height: 40),
-              TextField(decoration: InputDecoration(labelText: 'Phone Number / Email', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity, height: 55,
-                child: ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Recovery code sent!')));
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                  child: const Text('Send the code', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // ----------------------------------------------------------------------
 // WIDGET UTAMA (BOTTOM NAVIGATION)
 // ----------------------------------------------------------------------
@@ -906,7 +1762,7 @@ class PersonalInfoScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     _buildTextField('Email Address', 'cesc.fabregas@clubmail.com', Icons.mail_outline, rightLabel: _buildVerifiedBadge()),
                     const SizedBox(height: 20),
-                    _buildTextField('Phone Number', '(555) 382-9014', Icons.phone_outlined, rightLabel: _buildVerifiedBadge(), prefix: Row(children: [Text('🇺🇸 +1', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)), const SizedBox(width: 8), Container(height: 20, width: 1, color: Colors.grey.shade300)])),
+                    _buildTextField('Phone Number', '(555) 382-9014', Icons.phone_outlined, rightLabel: _buildVerifiedBadge(), prefix: Row(children: [Text('ðŸ‡ºðŸ‡¸ +1', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)), const SizedBox(width: 8), Container(height: 20, width: 1, color: Colors.grey.shade300)])),
                     const SizedBox(height: 20),
                     Row(
                       children: [
@@ -975,7 +1831,7 @@ class PersonalInfoScreen extends StatelessWidget {
                       children: [
                         Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.grey.shade50, shape: BoxShape.circle), child: Icon(Icons.lock_outline, color: Colors.grey.shade600, size: 20)),
                         const SizedBox(width: 15),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)), const SizedBox(height: 2), Text('••••••••••••', style: TextStyle(color: Colors.grey.shade400, fontSize: 16))])),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)), const SizedBox(height: 2), Text('â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢', style: TextStyle(color: Colors.grey.shade400, fontSize: 16))])),
                         Text('Change', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 13, fontWeight: FontWeight.bold))
                       ],
                     ),
@@ -1277,7 +2133,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     children: [
                       Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(border: Border.all(color: Colors.green), borderRadius: BorderRadius.circular(4)), child: const Text('In Stock', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold))),
                       const SizedBox(width: 10),
-                      Text('• Mountain Series', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                      Text('â€¢ Mountain Series', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                     ],
                   ),
                   const SizedBox(height: 15),
@@ -1573,7 +2429,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       children: [
                                         const Text('Home Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                                         const SizedBox(width: 6),
-                                        Text('• Primary', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+                                        Text('â€¢ Primary', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
                                       ],
                                     ),
                                     const SizedBox(height: 6),
@@ -1673,7 +2529,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Payment Method', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        const Text('Manage', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 13, fontWeight: FontWeight.bold)),
+                        GestureDetector(
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentScreen())),
+                          child: const Text('Manage', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 13, fontWeight: FontWeight.bold)),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 15),
@@ -1700,7 +2559,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 4),
-                                Text('Expires 08/27 • Debit Card', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                                Text('Expires 08/27 â€¢ Debit Card', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
                               ],
                             ),
                           ),
@@ -1750,8 +2609,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ],
                     ),
                     const SizedBox(height: 15),
-                    _buildOrderItemCard(Icons.checkroom, 'Denim Classic Jacket', 'Size: L • Indigo Blue • Qty: 1', '\$30.00'),
-                    _buildOrderItemCard(Icons.eco, 'Basic Eco-Cotton T-Shirt', 'Size: M • Sand Linen • Qty: 1', '\$15.00', iconColor: Colors.green),
+                    _buildOrderItemCard(Icons.checkroom, 'Denim Classic Jacket', 'Size: L â€¢ Indigo Blue â€¢ Qty: 1', '\$30.00'),
+                    _buildOrderItemCard(Icons.eco, 'Basic Eco-Cotton T-Shirt', 'Size: M â€¢ Sand Linen â€¢ Qty: 1', '\$15.00', iconColor: Colors.green),
                     const SizedBox(height: 25),
 
                     // 7. Summary
@@ -1987,7 +2846,7 @@ class _AddressScreenState extends State<AddressScreen> {
                       subtitle1: 'Primary residence',
                       nameAndPhone: 'Cesc Fabregas  |  (+1 858-555-0192)',
                       addressText: '123 Main Street, Apt 4B, San Diego, CA 92101',
-                      extraWidget: Container(margin: const EdgeInsets.only(top: 8), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade100)), child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.check_circle, color: Colors.green, size: 12), SizedBox(width: 4), Text('Fast Transit • Door concierge delivery', style: TextStyle(color: Colors.green, fontSize: 11))])),
+                      extraWidget: Container(margin: const EdgeInsets.only(top: 8), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade100)), child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.check_circle, color: Colors.green, size: 12), SizedBox(width: 4), Text('Fast Transit â€¢ Door concierge delivery', style: TextStyle(color: Colors.green, fontSize: 11))])),
                     ),
                     const SizedBox(height: 15),
 
@@ -2020,16 +2879,19 @@ class _AddressScreenState extends State<AddressScreen> {
                     const SizedBox(height: 25),
 
                     // Add New Address Button
-                    Container(
-                      width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 20),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFF00BCD4).withOpacity(0.5), width: 2)), 
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), child: const Icon(Icons.add, color: Color(0xFF00BCD4), size: 16)),
-                          const SizedBox(width: 10),
-                          const Text('Add New Delivery Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                        ],
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddNewAddressScreen())),
+                      child: Container(
+                        width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 20),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFF00BCD4).withOpacity(0.5), width: 2)), 
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), child: const Icon(Icons.add, color: Color(0xFF00BCD4), size: 16)),
+                            const SizedBox(width: 10),
+                            const Text('Add New Delivery Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 25),
@@ -2205,17 +3067,20 @@ class _AddressScreenState extends State<AddressScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(isSelected ? 'Selected for this order' : 'Select this address', style: TextStyle(color: isSelected ? const Color(0xFF0F8A9E) : const Color(0xFF00BCD4), fontSize: 12, fontWeight: FontWeight.bold)),
-                Row(
-                  children: [
-                    const Icon(Icons.edit, size: 14, color: Colors.black87),
-                    const SizedBox(width: 4),
-                    const Text('Edit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
+                GestureDetector(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditAddressScreen())),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.edit, size: 14, color: Colors.black87),
+                      const SizedBox(width: 4),
+                      const Text('Edit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
                     if (isSelected) ...[
                       const SizedBox(width: 10),
                       const Icon(Icons.more_vert, size: 16, color: Colors.grey),
                     ]
                   ],
-                )
+                ),
+               )
               ],
             )
           ],
@@ -2265,7 +3130,7 @@ class _EditBagScreenState extends State<EditBagScreen> {
                     children: [
                       const Text('Edit Bag', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 2),
-                      Text('2 ITEMS SELECTED • ORDER #ORD-9302', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      Text('2 ITEMS SELECTED â€¢ ORDER #ORD-9302', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     ],
                   ),
                   Container(
@@ -2334,8 +3199,8 @@ class _EditBagScreenState extends State<EditBagScreen> {
                       icon: Icons.checkroom, iconColor: Colors.blueGrey.shade800,
                       badgeText: 'Eco',
                       title: 'Denim Classic Jacket',
-                      desc: 'Classic Fit • Heavyweight 14oz Cotton',
-                      statusColor: Colors.green, statusText: 'In Stock • Ships Tomorrow 14:00',
+                      desc: 'Classic Fit â€¢ Heavyweight 14oz Cotton',
+                      statusColor: Colors.green, statusText: 'In Stock â€¢ Ships Tomorrow 14:00',
                       price: '\$30.00',
                       sizeList: ['S', 'M', 'L', 'XL'],
                       selectedSize: size1,
@@ -2676,7 +3541,2146 @@ class _EditBagScreenState extends State<EditBagScreen> {
   }
 }
 
-class PaymentScreen extends StatelessWidget { const PaymentScreen({super.key}); @override Widget build(BuildContext context) { return Scaffold(appBar: AppBar(title: const Text('Payment Method', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), backgroundColor: Colors.transparent, elevation: 0, iconTheme: const IconThemeData(color: Colors.black)), body: ListView(padding: const EdgeInsets.all(20), children: [_buildPaymentOption(context, 'Credit Card', Icons.credit_card, true), _buildPaymentOption(context, 'PayPal', Icons.paypal, false), _buildPaymentOption(context, 'Cash on Delivery', Icons.money, false)])); } Widget _buildPaymentOption(BuildContext context, String title, IconData icon, bool isSelected) { return Container(margin: const EdgeInsets.only(bottom: 15), child: ListTile(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade300)), leading: Icon(icon, color: isSelected ? Theme.of(context).primaryColor : Colors.grey), title: Text(title, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)), trailing: isSelected ? Icon(Icons.check_circle, color: Theme.of(context).primaryColor) : null, onTap: () => Navigator.pop(context))); } }
+class AddNewAddressScreen extends StatefulWidget {
+  const AddNewAddressScreen({super.key});
+
+  @override
+  State<AddNewAddressScreen> createState() => _AddNewAddressScreenState();
+}
+
+class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
+  int selectedLabel = 0; // 0: Home, 1: Office, 2: Parents
+  bool isDefault = true;
+  bool isEco = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                      child: const Icon(Icons.arrow_back_ios_new, size: 18),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        const Text('Add New Address', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        Text('SHIPPING & BILLING DETAILS', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 38), // Balance for centering
+                ],
+              ),
+            ),
+            
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Map Area
+                    Container(
+                      height: 180,
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.grey.shade200),
+                        // Simulate grid lines background
+                        image: const DecorationImage(
+                          image: NetworkImage('https://www.transparenttextures.com/patterns/cubes.png'), // Mock map texture
+                          repeat: ImageRepeat.repeat,
+                          opacity: 0.1,
+                        )
+                      ),
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(color: Color(0xFF00BCD4), shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))]),
+                                  child: const Icon(Icons.location_on, color: Colors.white, size: 24),
+                                ),
+                                Container(width: 8, height: 8, margin: const EdgeInsets.only(top: 4), decoration: BoxDecoration(color: Colors.black.withOpacity(0.2), shape: BoxShape.circle)),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 15, left: 15,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)]),
+                              child: Row(
+                                children: [
+                                  Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
+                                  const SizedBox(width: 6),
+                                  const Text('Precise Pin Enabled', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 15, right: 15,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(12)),
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.pinch, color: Colors.white, size: 14),
+                                  SizedBox(width: 6),
+                                  Text('Adjust Pin', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+
+                    // Current GPS
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.cyan.shade100)),
+                      child: Row(
+                        children: [
+                          Container(padding: const EdgeInsets.all(10), decoration: const BoxDecoration(color: Color(0xFF00BCD4), borderRadius: BorderRadius.all(Radius.circular(10))), child: const Icon(Icons.my_location, color: Colors.white, size: 20)),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Use Current GPS Location', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                const SizedBox(height: 2),
+                                Text('Downtown, San Diego, CA', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.cyan.shade100)), child: const Text('Locate', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+
+                    // Contact Person Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('CONTACT PERSON', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                        const Text('Saved profile used', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 11)),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    const Text('Full Name *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                      child: const TextField(
+                        decoration: InputDecoration(border: InputBorder.none, hintText: 'Cesc Fabregas', suffixIcon: Icon(Icons.person_outline, color: Colors.grey, size: 20), suffixIconConstraints: BoxConstraints(minWidth: 20)),
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    const Text('Mobile Phone Number *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                          child: const Row(children: [Text('ðŸ‡ºðŸ‡¸ +1', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), SizedBox(width: 8), Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: 18)]),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                            child: const TextField(
+                              decoration: InputDecoration(border: InputBorder.none, hintText: '(858) 555-0192', suffixIcon: Icon(Icons.check, color: Colors.green, size: 20), suffixIconConstraints: BoxConstraints(minWidth: 20)),
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text('Couriers will call or SMS for access updates.', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    const SizedBox(height: 25),
+
+                    // Address Details Section
+                    Text('ADDRESS DETAILS', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                    const SizedBox(height: 15),
+                    const Text('Street Address *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: '123 Main Street'), style: TextStyle(fontSize: 14))),
+                    
+                    const SizedBox(height: 15),
+                    const Text('Apartment, Suite, Unit, Building (Optional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: 'Apt 4B'), style: TextStyle(fontSize: 14))),
+                    
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('City *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              const SizedBox(height: 8),
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: 'San Diego'), style: TextStyle(fontSize: 14))),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('ZIP / Postal Code *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              const SizedBox(height: 8),
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: '92101'), style: TextStyle(fontSize: 14))),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+
+                    const SizedBox(height: 15),
+                    const Text('State / Region *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: 'California (CA)', suffixIcon: Icon(Icons.keyboard_arrow_down, color: Colors.grey), suffixIconConstraints: BoxConstraints(minWidth: 20)), style: TextStyle(fontSize: 14))),
+                    
+                    const SizedBox(height: 25),
+                    const Text('Address Label Tag', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildLabelPill(0, 'Home', Icons.home_outlined),
+                          const SizedBox(width: 10),
+                          _buildLabelPill(1, 'Office / Work', Icons.business_center_outlined),
+                          const SizedBox(width: 10),
+                          _buildLabelPill(2, 'Parents / Fam', Icons.apartment_outlined),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Delivery Instructions / Courier Note', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        Text('Optional', style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 11)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                      child: const TextField(maxLines: 3, decoration: InputDecoration(border: InputBorder.none, hintText: 'Ring doorbell twice upon arrival'), style: TextStyle(fontSize: 14)),
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    // Settings Card
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.verified_user_outlined, color: Color(0xFF0F8A9E), size: 20),
+                              SizedBox(width: 8),
+                              Text('DELIVERY & ADDRESS SETTINGS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text('Set as Default Address', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                        const SizedBox(width: 8),
+                                        Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(4)), child: const Text('DEFAULT', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text('Use as primary destination for fast 1-click checkout', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                                  ],
+                                ),
+                              ),
+                              Switch(value: isDefault, activeColor: Colors.blueAccent, onChanged: (val) => setState(() => isDefault = val)),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          Divider(height: 1, color: Colors.grey.shade100),
+                          const SizedBox(height: 15),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text('Eco-friendly minimal packaging', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                        const SizedBox(width: 6),
+                                        Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(6)), child: const Row(children: [Icon(Icons.eco, color: Colors.green, size: 10), SizedBox(width: 2), Text('Eco', style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold))])),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text('100% biodegradable corrugated box & paper tape', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                                  ],
+                                ),
+                              ),
+                              Switch(value: isEco, activeColor: Colors.blueAccent, onChanged: (val) => setState(() => isEco = val)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Bottom Action Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))]),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity, height: 55,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00BCD4), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.location_on_outlined, color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text('Save & Use This Address', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)), child: const Text('CONFIRM', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold))),
+                              const SizedBox(width: 6),
+                              const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.verified_user, color: Colors.greenAccent, size: 14),
+                      const SizedBox(width: 6),
+                      Text('100% Guaranteed On-Time Safe Delivery & Encrypted', style: TextStyle(color: Colors.grey.shade400, fontSize: 10)),
+                    ],
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabelPill(int index, String title, IconData icon) {
+    bool isSel = selectedLabel == index;
+    return GestureDetector(
+      onTap: () => setState(() => selectedLabel = index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSel ? const Color(0xFF00BCD4) : Colors.white,
+          border: Border.all(color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: isSel ? Colors.white : Colors.grey.shade600, size: 16),
+            const SizedBox(width: 6),
+            Text(title, style: TextStyle(color: isSel ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class EditAddressScreen extends StatefulWidget {
+  const EditAddressScreen({super.key});
+
+  @override
+  State<EditAddressScreen> createState() => _EditAddressScreenState();
+}
+
+class _EditAddressScreenState extends State<EditAddressScreen> {
+  int selectedLabel = 0; // 0: Home, 1: Office, 2: Parents
+  bool isDefault = true;
+  bool isEco = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                      child: const Icon(Icons.arrow_back_ios_new, size: 18),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        const Text('Edit Address', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        Text('UPDATE SHIPPING & BILLING DETAILS', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(color: Colors.red.shade50, shape: BoxShape.circle),
+                    child: Icon(Icons.delete_outline, color: Colors.red.shade400, size: 22),
+                  ), 
+                ],
+              ),
+            ),
+            
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Map Area
+                    Container(
+                      height: 180,
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.grey.shade200),
+                        image: const DecorationImage(
+                          image: NetworkImage('https://www.transparenttextures.com/patterns/cubes.png'), 
+                          repeat: ImageRepeat.repeat,
+                          opacity: 0.1,
+                        )
+                      ),
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(color: Color(0xFF00BCD4), shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))]),
+                                  child: const Icon(Icons.location_on, color: Colors.white, size: 24),
+                                ),
+                                Container(width: 8, height: 8, margin: const EdgeInsets.only(top: 4), decoration: BoxDecoration(color: Colors.black.withOpacity(0.2), shape: BoxShape.circle)),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 15, left: 15,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)]),
+                              child: Row(
+                                children: [
+                                  Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
+                                  const SizedBox(width: 6),
+                                  const Text('Precise Pin Enabled', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 15, right: 15,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(12)),
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.pinch, color: Colors.white, size: 14),
+                                  SizedBox(width: 6),
+                                  Text('Adjust Pin', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+
+                    // Current GPS
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.cyan.shade100)),
+                      child: Row(
+                        children: [
+                          Container(padding: const EdgeInsets.all(10), decoration: const BoxDecoration(color: Color(0xFF00BCD4), borderRadius: BorderRadius.all(Radius.circular(10))), child: const Icon(Icons.my_location, color: Colors.white, size: 20)),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Use Current GPS Location', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                const SizedBox(height: 2),
+                                Text('Downtown, San Diego, CA', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.cyan.shade100)), child: const Text('Locate', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+
+                    // Contact Person Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('CONTACT PERSON', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                        Row(
+                          children: [
+                            Icon(Icons.sync, color: const Color(0xFF0F8A9E), size: 14),
+                            const SizedBox(width: 4),
+                            const Text('Sync with profile', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 11)),
+                          ],
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    const Text('Full Name *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                      child: const TextField(
+                        decoration: InputDecoration(border: InputBorder.none, hintText: 'Cesc Fabregas', suffixIcon: Icon(Icons.person_outline, color: Colors.grey, size: 20), suffixIconConstraints: BoxConstraints(minWidth: 20)),
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    const Text('Mobile Phone Number *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                          child: const Row(children: [Text('ðŸ‡ºðŸ‡¸ +1', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), SizedBox(width: 8), Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: 18)]),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                            child: const TextField(
+                              decoration: InputDecoration(border: InputBorder.none, hintText: '(858) 555-0192', suffixIcon: Icon(Icons.check, color: Colors.green, size: 20), suffixIconConstraints: BoxConstraints(minWidth: 20)),
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text('Couriers will call or SMS for access updates.', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    const SizedBox(height: 25),
+
+                    // Address Details Section
+                    Text('ADDRESS DETAILS', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                    const SizedBox(height: 15),
+                    const Text('Street Address *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: '123 Main Street'), style: TextStyle(fontSize: 14))),
+                    
+                    const SizedBox(height: 15),
+                    const Text('Apartment, Suite, Unit, Building (Optional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: 'Apt 4B'), style: TextStyle(fontSize: 14))),
+                    
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('City *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              const SizedBox(height: 8),
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: 'San Diego'), style: TextStyle(fontSize: 14))),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('ZIP / Postal Code *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              const SizedBox(height: 8),
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: '92101'), style: TextStyle(fontSize: 14))),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+
+                    const SizedBox(height: 15),
+                    const Text('State / Region *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)), child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: 'California (CA)', suffixIcon: Icon(Icons.keyboard_arrow_down, color: Colors.grey), suffixIconConstraints: BoxConstraints(minWidth: 20)), style: TextStyle(fontSize: 14))),
+                    
+                    const SizedBox(height: 25),
+                    const Text('Address Label Tag', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildLabelPill(0, 'Home', Icons.home_outlined),
+                          const SizedBox(width: 10),
+                          _buildLabelPill(1, 'Office / Work', Icons.business_center_outlined),
+                          const SizedBox(width: 10),
+                          _buildLabelPill(2, 'Parents / Fam', Icons.apartment_outlined),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Delivery Instructions / Courier Note', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        Text('Optional', style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 11)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                      child: const TextField(maxLines: 3, decoration: InputDecoration(border: InputBorder.none, hintText: 'Ring doorbell twice upon arrival'), style: TextStyle(fontSize: 14)),
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    // Settings Card
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.verified_user_outlined, color: Color(0xFF0F8A9E), size: 20),
+                              SizedBox(width: 8),
+                              Text('DELIVERY & ADDRESS SETTINGS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text('Set as Default Address', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                        const SizedBox(width: 8),
+                                        Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(4)), child: const Text('DEFAULT', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text('Use as primary destination for fast 1-click checkout', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                                  ],
+                                ),
+                              ),
+                              Switch(value: isDefault, activeColor: const Color(0xFF00BCD4), onChanged: (val) => setState(() => isDefault = val)),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          Divider(height: 1, color: Colors.grey.shade100),
+                          const SizedBox(height: 15),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text('Eco-friendly minimal packaging', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                        const SizedBox(width: 6),
+                                        Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(6)), child: const Row(children: [Icon(Icons.eco, color: Colors.green, size: 10), SizedBox(width: 2), Text('Eco', style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold))])),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text('100% biodegradable corrugated box & paper tape', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                                  ],
+                                ),
+                              ),
+                              Switch(value: isEco, activeColor: const Color(0xFF00BCD4), onChanged: (val) => setState(() => isEco = val)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Bottom Action Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))]),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity, height: 55,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00BCD4), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.check_circle_outline, color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text('Save Changes', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)), child: const Text('UPDATE', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold))),
+                              const SizedBox(width: 6),
+                              const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.verified_user, color: Colors.greenAccent, size: 14),
+                      const SizedBox(width: 6),
+                      Text('100% Guaranteed On-Time Safe Delivery & Encrypted', style: TextStyle(color: Colors.grey.shade400, fontSize: 10)),
+                    ],
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabelPill(int index, String title, IconData icon) {
+    bool isSel = selectedLabel == index;
+    return GestureDetector(
+      onTap: () => setState(() => selectedLabel = index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSel ? const Color(0xFF00BCD4) : Colors.white,
+          border: Border.all(color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: isSel ? Colors.white : Colors.grey.shade600, size: 16),
+            const SizedBox(width: 6),
+            Text(title, style: TextStyle(color: isSel ? Colors.white : Colors.black87, fontWeight: FontWeight.bold, fontSize: 12)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PaymentScreen extends StatefulWidget {
+  const PaymentScreen({super.key});
+
+  @override
+  State<PaymentScreen> createState() => _PaymentScreenState();
+}
+
+class _PaymentScreenState extends State<PaymentScreen> {
+  // Selected Payment Method: 0=Visa, 1=Mastercard, 2=ApplePay, 3=PayPal, 4=COD
+  int selectedMethod = 0; 
+  bool rememberCheckout = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                      child: const Icon(Icons.arrow_back_ios_new, size: 18),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        const Text('Select Payment', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        Text('ORDER #ORD-9302', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.cyan.shade100)),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.add, color: Color(0xFF00BCD4), size: 16),
+                        SizedBox(width: 4),
+                        Text('Add', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+            
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Checkout Total Banner
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(16)),
+                      child: Row(
+                        children: [
+                          Container(padding: const EdgeInsets.all(10), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF00BCD4), size: 20)),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Checkout Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                const SizedBox(height: 2),
+                                Text('2 items including shipping', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          const Text('\$40.50', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+
+                    // SAVED CARDS Section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('SAVED CARDS', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                        Text('2 on file', style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 11)),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    _buildActiveVisaCard(),
+                    const SizedBox(height: 12),
+                    _buildInactiveCard(1, 'Mastercard ending in 8831', 'Expires 11/26 â€¢ Credit Card', Icons.circle, Colors.orange, 'Set Default'),
+                    const SizedBox(height: 15),
+                    
+                    // Add New Card Button
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddNewCardScreen())),
+                      child: Container(
+                        width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 18),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.cyan.shade100, width: 2, style: BorderStyle.solid)), 
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add, color: Color(0xFF0F8A9E), size: 18),
+                            SizedBox(width: 8),
+                            Text('Add New Credit or Debit Card', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+
+                    // EXPRESS & DIGITAL WALLETS
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('EXPRESS & DIGITAL WALLETS', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                        Row(
+                          children: [
+                            Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
+                            const SizedBox(width: 4),
+                            const Text('Instant', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 11)),
+                          ],
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    _buildExpressOption(2, 'Apple Pay', '1-Touch Instant Checkout Enabled', Icons.apple, Colors.black, 'Ready', Colors.green, const ApplePayScreen()),
+                    const SizedBox(height: 12),
+                    _buildExpressOption(3, 'PayPal', 'cesc.fabregas@clubmail.com', Icons.paypal, Colors.blue.shade50, 'Connected', const Color(0xFF00BCD4), const PayPalScreen()),
+                    const SizedBox(height: 25),
+
+                    // OTHER METHODS
+                    Text('OTHER METHODS', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                    const SizedBox(height: 15),
+                    _buildExpressOption(4, 'Cash on Delivery', 'Pay upon package arrival', Icons.local_mall_outlined, Colors.orange.shade50, 'Verified Area', Colors.orange, const CODScreen()),
+                    
+                    const SizedBox(height: 25),
+                    
+                    // Remember Toggle
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Remember for faster checkout', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+                                const SizedBox(height: 4),
+                                Text('Use Visa 4242 as default on future purchases', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                          Switch(value: rememberCheckout, activeColor: const Color(0xFF00BCD4), onChanged: (val) => setState(() => rememberCheckout = val)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Bottom Action Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))]),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity, height: 55,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00BCD4), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.verified_user_outlined, color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text('Use Selected Method', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text('\$40.50', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                              SizedBox(width: 8),
+                              Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.lock_outline, color: Colors.blueGrey, size: 12),
+                      const SizedBox(width: 6),
+                      Text('256-bit Bank-grade Encryption & PCI-DSS Compliant', style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
+                    ],
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveVisaCard() {
+    bool isSel = selectedMethod == 0;
+    return GestureDetector(
+      onTap: () => setState(() => selectedMethod = 0),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade200, width: isSel ? 2 : 1),
+          boxShadow: isSel ? [BoxShadow(color: Colors.cyan.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))] : [],
+        ),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(isSel ? Icons.check_circle : Icons.circle_outlined, color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade300, size: 22),
+                const SizedBox(width: 15),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(8)),
+                  child: const Text('VISA', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 14, fontStyle: FontStyle.italic)),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Visa ending in 4242', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          Row(
+                            children: [
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(10)), child: const Text('DEFAULT', style: TextStyle(color: Color(0xFF00BCD4), fontSize: 9, fontWeight: FontWeight.bold))),
+                              const SizedBox(width: 5),
+                              const Icon(Icons.more_vert, color: Colors.grey, size: 16),
+                            ],
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text('Expires 08/27 â€¢ Debit Card', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                      const SizedBox(height: 4),
+                      Text('Cesc Fabregas', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    ],
+                  ),
+                )
+              ],
+            ),
+            if (isSel) ...[
+              const SizedBox(height: 20),
+              Divider(height: 1, color: Colors.grey.shade200),
+              const SizedBox(height: 15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.lock_outline, color: Color(0xFF0F8A9E), size: 16),
+                      SizedBox(width: 8),
+                      Text('Confirm Security Code', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.black87)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Container(padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)), child: const Text('â€¢â€¢â€¢', style: TextStyle(fontSize: 14, letterSpacing: 2, color: Colors.black))),
+                      const SizedBox(width: 10),
+                      const Text('Verified', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 12)),
+                    ],
+                  )
+                ],
+              )
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInactiveCard(int index, String title, String sub, IconData icon, Color iconColor, String rightPill) {
+    bool isSel = selectedMethod == index;
+    return GestureDetector(
+      onTap: () => setState(() => selectedMethod = index),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade200, width: isSel ? 2 : 1)),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(isSel ? Icons.check_circle : Icons.circle_outlined, color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade300, size: 22),
+            const SizedBox(width: 15),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade100)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(width: 12, height: 12, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
+                  Transform.translate(offset: const Offset(-4, 0), child: Container(width: 12, height: 12, decoration: BoxDecoration(color: Colors.amber.withOpacity(0.8), shape: BoxShape.circle))),
+                ],
+              ) 
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(height: 6),
+                  Text(sub, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                ],
+              ),
+            ),
+            Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(10)), child: Text(rightPill, style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.bold))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpressOption(int index, String title, String sub, IconData icon, Color iconBg, String badgeTxt, Color badgeColor, Widget targetScreen) {
+    bool isSel = selectedMethod == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() => selectedMethod = index);
+        Navigator.push(context, MaterialPageRoute(builder: (_) => targetScreen));
+      },
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade200, width: isSel ? 2 : 1)),
+        child: Row(
+          children: [
+            Icon(isSel ? Icons.check_circle : Icons.circle_outlined, color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade300, size: 22),
+            const SizedBox(width: 15),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(12)),
+              child: icon == Icons.paypal 
+                  ? const Text('PP', style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 16))
+                  : Icon(icon, color: iconBg == Colors.black ? Colors.white : Colors.orange, size: 20),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const SizedBox(width: 8),
+                      Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: badgeColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)), child: Row(children: [if(badgeTxt == 'Ready') const Icon(Icons.circle, color: Colors.green, size: 6), if(badgeTxt == 'Ready') const SizedBox(width: 4), Text(badgeTxt, style: TextStyle(color: badgeColor, fontSize: 9, fontWeight: FontWeight.bold))])),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(sub, style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 14),
+          ],
+        ),
+      ),
+    );
+  }
+}
+class AddNewCardScreen extends StatefulWidget {
+  const AddNewCardScreen({super.key});
+  @override State<AddNewCardScreen> createState() => _AddNewCardScreenState();
+}
+class _AddNewCardScreenState extends State<AddNewCardScreen> {
+  bool isSameAddress = true;
+  bool saveCard = true;
+  bool setAsDefault = true;
+
+  @override Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)), child: const Icon(Icons.arrow_back_ios_new, size: 18)),
+                  ),
+                  Column(
+                    children: [
+                      const Text('Add New Card', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 2),
+                      Text('CREDIT OR DEBIT CARD', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ],
+                  ),
+                  Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), child: const Icon(Icons.security, color: Color(0xFF0F8A9E), size: 18)),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Scan Card Banner
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                      decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.cyan.shade100)),
+                      child: Row(
+                        children: [
+                          Container(padding: const EdgeInsets.all(10), decoration: const BoxDecoration(color: Color(0xFF00BCD4), borderRadius: BorderRadius.all(Radius.circular(10))), child: const Icon(Icons.camera_alt, color: Colors.white, size: 20)),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Scan Your Card', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                const SizedBox(height: 2),
+                                Text('Auto-fill card details instantly', style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                          Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.cyan.shade100)), child: const Text('Scan Now', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Credit Card UI
+                    Container(
+                      height: 200, width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: const LinearGradient(colors: [Color(0xFF0A4F5C), Color(0xFF00BCD4)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        boxShadow: [BoxShadow(color: const Color(0xFF00BCD4).withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 10))],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(width: 40, height: 30, decoration: BoxDecoration(color: Colors.amber.shade200, borderRadius: BorderRadius.circular(6)), child: const Icon(Icons.sim_card, size: 20, color: Colors.black54)),
+                                  const SizedBox(width: 10),
+                                  const Icon(Icons.wifi, color: Colors.white70, size: 24),
+                                ],
+                              ),
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(6)), child: const Text('VISA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 16))),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('CARD NUMBER', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                              const SizedBox(height: 4),
+                              const Text('4242   â€¢â€¢â€¢â€¢   â€¢â€¢â€¢â€¢   8821', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('CARD HOLDER', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                  const SizedBox(height: 4),
+                                  const Text('CESC FABREGAS', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('EXPIRES', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                  const SizedBox(height: 4),
+                                  const Text('08/28', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                ],
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+                    
+                    // Form fields
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Cardholder Name *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                            child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: 'Cesc Fabregas', prefixIcon: Icon(Icons.person_outline, size: 20, color: Colors.grey), prefixIconConstraints: BoxConstraints(minWidth: 30)), style: TextStyle(fontSize: 14)),
+                          ),
+                          const SizedBox(height: 15),
+                          const Text('Card Number *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                            child: TextField(decoration: InputDecoration(border: InputBorder.none, hintText: '4242 8821 9012 3456', prefixIcon: const Icon(Icons.credit_card, size: 20, color: Colors.grey), prefixIconConstraints: const BoxConstraints(minWidth: 30), suffixIcon: Padding(padding: const EdgeInsets.only(top:12, bottom:12), child: Container(padding: const EdgeInsets.symmetric(horizontal: 8), decoration: const BoxDecoration(color: Color(0xFFE0F7FA), borderRadius: BorderRadius.all(Radius.circular(6))), child: const Text('VISA', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 10, height: 1.5))))), style: const TextStyle(fontSize: 14)),
+                          ),
+                          const SizedBox(height: 15),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Expiry Date *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                                      decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                                      child: const TextField(decoration: InputDecoration(border: InputBorder.none, hintText: '08 / 28', prefixIcon: Icon(Icons.calendar_today_outlined, size: 18, color: Colors.grey), prefixIconConstraints: BoxConstraints(minWidth: 30)), style: TextStyle(fontSize: 14)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text('CVV / CVC *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                        Row(children: [const Icon(Icons.help_outline, size: 12, color: Color(0xFF0F8A9E)), const SizedBox(width: 2), const Text('3 digits', style: TextStyle(fontSize: 10, color: Color(0xFF0F8A9E)))])
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                                      decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                                      child: const TextField(obscureText: true, decoration: InputDecoration(border: InputBorder.none, hintText: 'â€¢â€¢â€¢', prefixIcon: Icon(Icons.lock_outline, size: 18, color: Colors.grey), prefixIconConstraints: BoxConstraints(minWidth: 30)), style: TextStyle(fontSize: 14, letterSpacing: 2)),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () => setState(() => isSameAddress = !isSameAddress),
+                                child: Container(
+                                  width: 18, height: 18, margin: const EdgeInsets.only(top: 2),
+                                  decoration: BoxDecoration(color: isSameAddress ? const Color(0xFF0F8A9E) : Colors.white, borderRadius: BorderRadius.circular(4), border: Border.all(color: isSameAddress ? const Color(0xFF0F8A9E) : Colors.grey.shade300)),
+                                  child: isSameAddress ? const Icon(Icons.check, color: Colors.white, size: 14) : null,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(color: Colors.grey.shade700, fontSize: 12, height: 1.4),
+                                    children: const [
+                                      TextSpan(text: 'Billing address is the same as delivery address: '),
+                                      TextSpan(text: '123 Main Street, Apt 4B, San Diego', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+                                    ]
+                                  ),
+                                ),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Toggles
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Save card for future checkouts', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  const SizedBox(height: 4),
+                                  Text('Encrypted tokenization via PCI-DSS', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                ],
+                              ),
+                              Switch(value: saveCard, activeColor: const Color(0xFF00BCD4), onChanged: (val) => setState(() => saveCard = val)),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          Divider(height: 1, color: Colors.grey.shade100),
+                          const SizedBox(height: 15),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Set as default payment card', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  const SizedBox(height: 4),
+                                  Text('Use for 1-click order authorizations', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                ],
+                              ),
+                              Switch(value: setAsDefault, activeColor: const Color(0xFF00BCD4), onChanged: (val) => setState(() => setAsDefault = val)),
+                            ],
+                          ),
+                        ],
+                      )
+                    ),
+                    const SizedBox(height: 25),
+                    Center(child: Text('Accepted Networks:  VISA  MC  AMEX', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.bold))),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+            // Bottom Action Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))]),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity, height: 55,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00BCD4), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.check_circle_outline, color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text('Save & Use Card', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Text('\$40.50', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                              SizedBox(width: 8),
+                              Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('256-bit Bank-grade Encryption â€¢ PCI-DSS Compliant', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                    ],
+                  )
+                ],
+              ),
+            )
+          ]
+        )
+      )
+    );
+  }
+}
+
+class ApplePayScreen extends StatelessWidget {
+  const ApplePayScreen({super.key});
+  @override Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF2F4F7),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)), child: const Icon(Icons.arrow_back_ios_new, size: 18)),
+                  ),
+                  Column(
+                    children: [
+                      const Text('Apple Pay Checkout', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 2),
+                      Text('FAST 1-TOUCH AUTHORIZATION', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ],
+                  ),
+                  const Text('Cancel', style: TextStyle(color: Colors.blueGrey, fontWeight: FontWeight.bold, fontSize: 14)),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  children: [
+                    // Order Summary
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('CURRENT ORDER', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 0.5)),
+                                  const SizedBox(height: 4),
+                                  const Text('#ORD-9302', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 16)),
+                                ],
+                              ),
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(15), border: Border.all(color: Colors.cyan.shade100)), child: const Text('2 Items', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 12))),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Denim Jacket + Basic T-Shirt', style: TextStyle(color: Colors.blueGrey.shade600, fontSize: 13)), const Text('\$35.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))]),
+                          const SizedBox(height: 10),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Standard Shipping & Taxes', style: TextStyle(color: Colors.blueGrey.shade600, fontSize: 13)), const Text('\$5.50', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))]),
+                          const SizedBox(height: 20),
+                          Divider(height: 1, color: Colors.grey.shade200),
+                          const SizedBox(height: 20),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: const [Text('Total Due', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), Text('\$40.50', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22))]),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Apple Pay Sheet UI Mimic
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(25),
+                      decoration: BoxDecoration(color: const Color(0xFF131A26), borderRadius: BorderRadius.circular(30), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 10))]),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.white24)), child: const Icon(Icons.apple, color: Colors.white, size: 24)),
+                                  const SizedBox(width: 15),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('PAYMENT GATEWAY', style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Text('Apple Pay', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                          const SizedBox(width: 6),
+                                          Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle)),
+                                        ],
+                                      )
+                                    ],
+                                  )
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text('Authorization', style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 11)),
+                                  const SizedBox(height: 4),
+                                  const Text('\$40.50', style: TextStyle(color: Color(0xFF00BCD4), fontSize: 16, fontWeight: FontWeight.bold)),
+                                ],
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 25),
+                          Divider(height: 1, color: Colors.white.withOpacity(0.1)),
+                          const SizedBox(height: 25),
+                          Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.1))),
+                            child: Row(
+                              children: [
+                                Container(width: 45, height: 30, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(6)), child: const Icon(Icons.credit_card, size: 20)),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Apple Card', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                                      const SizedBox(height: 2),
+                                      Text('Mastercard â€¢â€¢â€¢â€¢ 9924', style: TextStyle(color: Colors.blueGrey.shade200, fontSize: 12)),
+                                    ],
+                                  ),
+                                ),
+                                const Text('Change', style: TextStyle(color: Color(0xFF00BCD4), fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 25),
+                          _buildAppleDetailRow('SHIPPING', 'Cesc Fabregas\n123 Main Street, San Diego, CA 92101'),
+                          const SizedBox(height: 15),
+                          _buildAppleDetailRow('DELIVERY', 'Standard (2-3 Business Days)', badge: 'FREE'),
+                          const SizedBox(height: 15),
+                          _buildAppleDetailRow('CONTACT', 'cesc.fabregas@clubmail.com'),
+                          const SizedBox(height: 35),
+                          Container(padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: const Color(0xFF00BCD4).withOpacity(0.2), shape: BoxShape.circle), child: const Icon(Icons.face_retouching_natural, color: Color(0xFF00BCD4), size: 30)),
+                          const SizedBox(height: 15),
+                          const Text('Double-Click Side Button to Pay', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                          const SizedBox(height: 4),
+                          Text('or verify with Face ID / Passcode', style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text('â† Choose a different payment method', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 13)),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+            // Bottom
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity, height: 60,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text('Authorize', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          SizedBox(width: 10),
+                          Icon(Icons.apple, color: Colors.white, size: 20),
+                          Text('Pay', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                          SizedBox(width: 15),
+                          Text('â€¢', style: TextStyle(color: Colors.blueGrey)),
+                          SizedBox(width: 15),
+                          Text('\$40.50', style: TextStyle(color: Color(0xFF00BCD4), fontSize: 16, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.lock, color: Colors.blueGrey, size: 12),
+                      const SizedBox(width: 6),
+                      Text('Protected by Apple Pay Secure Enclave', style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 11)),
+                    ],
+                  )
+                ],
+              ),
+            )
+          ],
+        )
+      )
+    );
+  }
+  
+  Widget _buildAppleDetailRow(String title, String val, {String? badge}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(width: 90, child: Text(title, style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 11, letterSpacing: 0.5))),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(val, textAlign: TextAlign.right, style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.4)),
+              if(badge != null) ...[const SizedBox(height: 4), Text(badge, style: const TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12))]
+            ],
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class PayPalScreen extends StatelessWidget {
+  const PayPalScreen({super.key});
+  @override Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)), child: const Icon(Icons.arrow_back_ios_new, size: 18)),
+                  ),
+                  Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text('PayPal Checkout', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          SizedBox(width: 6),
+                          Icon(Icons.shield, color: Colors.blue, size: 16),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text('CONNECTED ACCOUNT â€¢ #ORD-9302', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ],
+                  ),
+                  Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), child: const Icon(Icons.lock, color: Color(0xFF0F8A9E), size: 18)),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // PayPal Banner
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: const Color(0xFF003087), borderRadius: BorderRadius.circular(20), gradient: const LinearGradient(colors: [Color(0xFF003087), Color(0xFF0079C1)])),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  const Text('PP', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+                                  const SizedBox(width: 10),
+                                  const Text('PayPal', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+                                ],
+                              ),
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(0.5))), child: const Row(children: [Icon(Icons.check, color: Colors.white, size: 14), SizedBox(width: 4), Text('Verified', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))])),
+                            ],
+                          ),
+                          const SizedBox(height: 25),
+                          Divider(color: Colors.white.withOpacity(0.2), height: 1),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('CONNECTED ACCOUNT', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                  const SizedBox(height: 4),
+                                  const Text('cesc.fabregas@clubmail.com', style: TextStyle(color: Colors.white, fontSize: 13)),
+                                ],
+                              ),
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8), decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: const Text('Switch', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Summary
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Row(
+                        children: [
+                          Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.shopping_bag, color: Color(0xFF00BCD4))),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(children: const [Text('E-Commerce Store', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)), SizedBox(width: 6), Icon(Icons.verified, color: Colors.blue, size: 14)]),
+                                const SizedBox(height: 4),
+                                Text('Order #ORD-9302 â€¢ 2 items', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text('Total', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+                              const Text('\$40.50', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('PAY WITH', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1)),
+                        const Text('3 sources linked', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12)),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    _buildPPOption(true, 'PayPal Balance', '\$142.80 available', Icons.account_balance_wallet, Colors.blue, 'Preferred', Colors.blue.shade50, Colors.blue),
+                    const SizedBox(height: 12),
+                    _buildPPOption(false, 'Chase Checking', 'Primary Bank Account', Icons.account_balance, Colors.grey.shade700, 'â€¢â€¢â€¢â€¢ 5120', Colors.transparent, Colors.grey),
+                    const SizedBox(height: 12),
+                    _buildPPOption(false, 'Pay in 4 Interest-Free', '4 payments of \$10.12 every 2 weeks', Icons.money, Colors.orange, '0% APR', Colors.green.shade50, Colors.green),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(15),
+                      decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(16)),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.security, color: Color(0xFF0F8A9E), size: 18),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: RichText(
+                              text: const TextSpan(
+                                style: TextStyle(color: Colors.black87, fontSize: 12, height: 1.4),
+                                children: [
+                                  TextSpan(text: 'PayPal Purchase Protection: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  TextSpan(text: 'Eligible purchases are covered if items don\'t arrive or match description.'),
+                                ]
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Billing Currency', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+                        const Text('ðŸŒ USD (\$40.50) â€¢ No conversion fee', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+            // Bottom
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity, height: 55,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00BCD4), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                      child: const Text('Agree & Pay \$40.50 with PayPal  â†’', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Cancel and return to checkout', style: TextStyle(color: Colors.blueGrey, fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.lock, color: Colors.grey, size: 12),
+                      const SizedBox(width: 6),
+                      Text('Protected by PayPal 256-bit encryption & PCI-DSS standards', style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
+                    ],
+                  )
+                ],
+              ),
+            )
+          ]
+        )
+      )
+    );
+  }
+
+  Widget _buildPPOption(bool isSel, String title, String sub, IconData icon, Color iconColor, String badgeTxt, Color badgeBg, Color badgeColor) {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade200, width: isSel ? 2 : 1)),
+      child: Row(
+        children: [
+          Icon(isSel ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: isSel ? const Color(0xFF00BCD4) : Colors.grey.shade300, size: 22),
+          const SizedBox(width: 15),
+          Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: iconColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: iconColor, size: 20)),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                const SizedBox(height: 4),
+                Text(sub, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+              ],
+            ),
+          ),
+          if(badgeTxt.isNotEmpty)
+            Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(8)), child: Text(badgeTxt, style: TextStyle(color: badgeColor, fontSize: 11, fontWeight: FontWeight.bold))),
+        ],
+      ),
+    );
+  }
+}
+
+class CODScreen extends StatelessWidget {
+  const CODScreen({super.key});
+  @override Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)), child: const Icon(Icons.arrow_back_ios_new, size: 18)),
+                  ),
+                  Column(
+                    children: [
+                      const Text('Cash on Delivery', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 2),
+                      Text('ORDER CONFIRMATION #ORD-9302', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ],
+                  ),
+                  Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.cyan.shade100)), child: const Text('COD Mode', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 11, fontWeight: FontWeight.bold))),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    // Delivery Dest
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), child: const Icon(Icons.location_on, color: Color(0xFF00BCD4), size: 16)),
+                                  const SizedBox(width: 10),
+                                  Text('DELIVERY\nDESTINATION', style: TextStyle(color: Colors.blueGrey.shade300, fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 0.5)),
+                                ],
+                              ),
+                              Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(15), border: Border.all(color: Colors.green.shade100)), child: Row(children: const [Icon(Icons.circle, color: Colors.green, size: 8), SizedBox(width: 4), Text('COD Available in Your Area', style: TextStyle(color: Colors.green, fontSize: 10))])),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: const [Text('Cesc Fabregas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), Text('Home', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 12))]),
+                          const SizedBox(height: 8),
+                          const Text('123 Main Street, Apt 4B, San Diego, CA 92101', style: TextStyle(color: Colors.black87, fontSize: 13, height: 1.4)),
+                          const SizedBox(height: 12),
+                          Row(children: [const Icon(Icons.phone_outlined, size: 14, color: Colors.grey), const SizedBox(width: 6), Text('(858) 555-0192', style: TextStyle(color: Colors.grey.shade600, fontSize: 13))]),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Breakdown
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('PAYMENT BREAKDOWN', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                          const SizedBox(height: 15),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Subtotal', style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 14)), const Text('\$35.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14))]),
+                          const SizedBox(height: 12),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Standard Shipping', style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 14)), const Text('\$5.50', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14))]),
+                          const SizedBox(height: 12),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Row(children: [Text('COD Handling Fee', style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 14)), const SizedBox(width: 8), Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.orange.shade100, borderRadius: BorderRadius.circular(4)), child: const Text('WAIVED', style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)))]), const Text('\$0.00 (Free)', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 14))]),
+                          const SizedBox(height: 15),
+                          Divider(color: Colors.grey.shade200, height: 1), // Actually dashed in mockup, but solid is fine
+                          const SizedBox(height: 15),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Total to Pay at Door', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), const SizedBox(height: 4), Text('Inclusive of all local taxes', style: TextStyle(color: Colors.grey.shade400, fontSize: 11))]), const Text('\$40.50', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 24))]),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Notice
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.amber.shade50, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.amber.shade200)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.info, color: Colors.brown, size: 20),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('COURIER NOTICE', style: TextStyle(color: Colors.brown, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                                    const SizedBox(height: 4),
+                                    RichText(text: const TextSpan(style: TextStyle(color: Colors.brown, fontSize: 12, height: 1.4), children: [TextSpan(text: 'Please prepare exact change of '), TextSpan(text: '\$40.50', style: TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.underline)), TextSpan(text: ' when the courier arrives to expedite handover.')])),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          Divider(color: Colors.amber.shade200, height: 1),
+                          const SizedBox(height: 15),
+                          Row(children: [const Icon(Icons.sms_outlined, color: Colors.brown, size: 14), const SizedBox(width: 6), Text('Courier will call or send SMS prior to delivery.', style: TextStyle(color: Colors.brown.shade800, fontSize: 11))])
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Buyer Protection
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('COD BUYER PROTECTION', style: TextStyle(color: Colors.blueGrey.shade400, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                          const SizedBox(height: 15),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(padding: const EdgeInsets.all(2), decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), child: const Icon(Icons.check, color: Color(0xFF00BCD4), size: 14)),
+                              const SizedBox(width: 10),
+                              Expanded(child: RichText(text: const TextSpan(style: TextStyle(color: Colors.black87, fontSize: 12, height: 1.4), children: [TextSpan(text: 'Unboxing check allowed ', style: TextStyle(fontWeight: FontWeight.bold)), TextSpan(text: 'before cash payment handover.')])))
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(padding: const EdgeInsets.all(2), decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), child: const Icon(Icons.check, color: Color(0xFF00BCD4), size: 14)),
+                              const SizedBox(width: 10),
+                              Expanded(child: RichText(text: const TextSpan(style: TextStyle(color: Colors.black87, fontSize: 12, height: 1.4), children: [TextSpan(text: 'Instant digital receipt & invoice ', style: TextStyle(fontWeight: FontWeight.bold)), TextSpan(text: 'sent via SMS and email immediately upon collection.')])))
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+            // Bottom Action
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))]),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity, height: 55,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00BCD4), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                      child: const Text('Confirm Order via COD â€¢ \$40.50  â†’', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.verified, color: Colors.green, size: 14),
+                      const SizedBox(width: 6),
+                      Text('Safe, contactless or cash handover guarantee', style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 11)),
+                    ],
+                  )
+                ],
+              ),
+            )
+          ]
+        )
+      )
+    );
+  }
+}
 class OrderSuccessScreen extends StatelessWidget { const OrderSuccessScreen({super.key}); @override Widget build(BuildContext context) { return Scaffold(body: Center(child: Padding(padding: const EdgeInsets.all(30.0), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Container(padding: const EdgeInsets.all(30), decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), shape: BoxShape.circle), child: Icon(Icons.check_circle, size: 80, color: Theme.of(context).primaryColor)), const SizedBox(height: 30), const Text('Yay! Order Placed', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), const SizedBox(height: 10), Text('Your order has been placed successfully\nand will be processed soon.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500, fontSize: 16)), const SizedBox(height: 50), SizedBox(width: double.infinity, height: 55, child: ElevatedButton(onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const TrackingScreen())), style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))), child: const Text('Track Order', style: TextStyle(color: Colors.white, fontSize: 16)))), const SizedBox(height: 15), TextButton(onPressed: () => Navigator.pop(context), child: Text('Back to Home', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16)))])))); } }
 class TrackingScreen extends StatelessWidget { const TrackingScreen({super.key}); @override Widget build(BuildContext context) { return Scaffold(appBar: AppBar(title: const Text('Track Order', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), backgroundColor: Colors.transparent, elevation: 0, iconTheme: const IconThemeData(color: Colors.black)), body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.local_shipping, size: 100, color: Theme.of(context).primaryColor), const SizedBox(height: 30), const Text('Your order is on the way!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)), const SizedBox(height: 20), ElevatedButton(onPressed: () => Navigator.pop(context), style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor), child: const Text('Done', style: TextStyle(color: Colors.white)))]))); } }
 class CategoryListScreen extends StatefulWidget {
@@ -3140,7 +6144,7 @@ class ProfileScreen extends StatelessWidget {
                     Divider(height: 1, color: Colors.grey.shade100, indent: 70),
                     _buildMenuTile(context, Icons.help_outline, 'Help & Support', 'FAQ & Customer Service', null, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpSupportScreen()))),
                     Divider(height: 1, color: Colors.grey.shade100, indent: 70),
-                    _buildMenuTile(context, Icons.logout, 'Log Out', 'Sign out of your account', null, isLogout: true),
+                    _buildMenuTile(context, Icons.logout, 'Log Out', 'Sign out of your account', null, isLogout: true, onTap: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (route) => false)),
                   ]
                 )
               ),
@@ -3153,23 +6157,26 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildMenuTile(BuildContext context, IconData icon, String title, String subtitle, Widget? trailingExtra, {bool isLogout = false, VoidCallback? onTap}) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(color: isLogout ? Colors.red.shade50 : Colors.cyan.shade50, shape: BoxShape.circle),
-        child: Icon(icon, color: isLogout ? Colors.red : const Color(0xFF0F8A9E)),
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(color: isLogout ? Colors.red.shade50 : Colors.cyan.shade50, shape: BoxShape.circle),
+          child: Icon(icon, color: isLogout ? Colors.red : const Color(0xFF0F8A9E)),
+        ),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: isLogout ? Colors.red : Colors.black87)),
+        subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (trailingExtra != null) ...[trailingExtra, const SizedBox(width: 10)],
+            Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey.shade300),
+          ],
+        ),
+        onTap: onTap ?? () {},
       ),
-      title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: isLogout ? Colors.red : Colors.black87)),
-      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (trailingExtra != null) ...[trailingExtra, const SizedBox(width: 10)],
-          Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey.shade300),
-        ],
-      ),
-      onTap: onTap ?? () {},
     );
   }
 
@@ -3268,7 +6275,7 @@ class NotificationsScreen extends StatelessWidget {
                     _buildNotifCard(
                       context: context,
                       iconBox: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.local_shipping_outlined, color: Color(0xFF00BCD4), size: 24)),
-                      title: 'Order Dispatched! 🚚',
+                      title: 'Order Dispatched! ðŸšš',
                       body: Text('Your package with Basic Eco-Cotton T-Shirt has been shipped via Express Courier.', style: TextStyle(color: Colors.grey.shade500, fontSize: 13, height: 1.4)),
                       actionButton: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6), decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(20)), child: const Row(children: [Text('Track Order', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)), SizedBox(width: 4), Icon(Icons.arrow_forward_ios, color: Colors.white, size: 10)])),
                       time: '10m ago',
@@ -3279,7 +6286,7 @@ class NotificationsScreen extends StatelessWidget {
                     _buildNotifCard(
                       context: context,
                       iconBox: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.local_fire_department_outlined, color: Colors.orange, size: 24)),
-                      title: 'Flash Sale Alert: Up to 40% OFF 🔥',
+                      title: 'Flash Sale Alert: Up to 40% OFF ðŸ”¥',
                       body: Text('Mountain Series Summer 2024 collection is now on limited-time discount. Don\'t miss out!', style: TextStyle(color: Colors.grey.shade500, fontSize: 13, height: 1.4)),
                       actionButton: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6), decoration: BoxDecoration(color: const Color(0xFF0B1221), borderRadius: BorderRadius.circular(20)), child: const Text('Shop Deals', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold))),
                       time: '1h ago',
@@ -3479,7 +6486,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   _buildSectionTitle('Price Range', Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(8)),
-                    child: Text('\$${_priceRange.start.toInt()} — \$${_priceRange.end.toInt()}', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold))
+                    child: Text('\$${_priceRange.start.toInt()} â€” \$${_priceRange.end.toInt()}', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold))
                   )),
                   const SizedBox(height: 20),
                   SliderTheme(
@@ -3758,19 +6765,22 @@ class HelpSupportScreen extends StatelessWidget {
                       ),
                     ),
                     const Text('Help & Support', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          const Icon(Icons.chat_outlined, size: 20, color: Color(0xFF0F8A9E)),
-                          Positioned(
-                            right: -2, top: -2,
-                            child: Container(width: 8, height: 8, decoration: BoxDecoration(color: Colors.green, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 1.5)))
-                          )
-                        ]
-                      )
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CustomerSupportChatScreen())),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Icon(Icons.chat_outlined, size: 20, color: Color(0xFF0F8A9E)),
+                            Positioned(
+                              right: -2, top: -2,
+                              child: Container(width: 8, height: 8, decoration: BoxDecoration(color: Colors.green, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 1.5)))
+                            )
+                          ]
+                        )
+                      ),
                     ),
                   ],
                 ),
@@ -3878,7 +6888,7 @@ class HelpSupportScreen extends StatelessWidget {
                       ]
                     ),
                     const SizedBox(height: 12),
-                    Text('Updated 2 hours ago • Assigned to Sarah M.', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    Text('Updated 2 hours ago â€¢ Assigned to Sarah M.', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
                   ]
                 )
               ),
@@ -4067,7 +7077,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                       ]
                     ),
                     const Spacer(),
-                    const Text('••••   ••••   ••••   4242', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                    const Text('â€¢â€¢â€¢â€¢   â€¢â€¢â€¢â€¢   â€¢â€¢â€¢â€¢   4242', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
                     const Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -4112,7 +7122,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                       Container(width: 44, height: 44, decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), alignment: Alignment.center, child: Text('VISA', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 11))),
                       'Visa ending in 4242', 
                       Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(10)), child: Text('Default', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 9, fontWeight: FontWeight.bold))),
-                      'Expires 08/27 • Debit Card', 
+                      'Expires 08/27 â€¢ Debit Card', 
                       Icon(Icons.more_vert, color: Colors.grey.shade400)
                     ),
                     Divider(height: 1, color: Colors.grey.shade100, indent: 70),
@@ -4133,7 +7143,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                       ),
                       'Mastercard ending in 8831', 
                       null,
-                      'Expires 11/26 • Credit Card', 
+                      'Expires 11/26 â€¢ Credit Card', 
                       Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(20)), child: Text('Set\nDefault', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600, fontSize: 10, fontWeight: FontWeight.bold, height: 1.2)))
                     ),
                     Divider(height: 1, color: Colors.grey.shade100, indent: 70),
@@ -4448,7 +7458,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                     children: [
                       const Text('My Orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 2),
-                      Text('CESC • GOLD VIP', style: TextStyle(fontSize: 10, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      Text('CESC â€¢ GOLD VIP', style: TextStyle(fontSize: 10, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     ],
                   ),
                   Container(
@@ -4599,7 +7609,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   children: [
                     const Text('Denim Classic Jacket', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
-                    Text('Size: L • Indigo Blue', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    Text('Size: L â€¢ Indigo Blue', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
                     const SizedBox(height: 4),
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('\$30.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text('Qty: 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.bold))])
                   ],
@@ -4635,7 +7645,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   children: [
                     Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(12)), child: Text('Details', style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.bold))),
                     const SizedBox(width: 8),
-                    Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(12)), child: const Row(children: [Text('Track Order', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)), SizedBox(width: 4), Icon(Icons.arrow_forward_ios, color: Colors.white, size: 10)])),
+                    GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OrderTrackingScreen())), child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(12)), child: const Row(children: [Text('Track Order', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)), SizedBox(width: 4), Icon(Icons.arrow_forward_ios, color: Colors.white, size: 10)]))),
                   ],
                 )
               ],
@@ -4681,7 +7691,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
               children: [
                 Row(
                   children: [
-                    Container(width: 28, height: 28, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.orange.shade100, shape: BoxShape.circle), child: const Text('🛵', style: TextStyle(fontSize: 12))),
+                    Container(width: 28, height: 28, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.orange.shade100, shape: BoxShape.circle), child: const Text('ðŸ›µ', style: TextStyle(fontSize: 12))),
                     const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -4708,7 +7718,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   children: [
                     const Text('Cargo Utility Pants', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
-                    Text('Size: 32 • Olive Green', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    Text('Size: 32 â€¢ Olive Green', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
                     const SizedBox(height: 4),
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('\$30.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text('Qty: 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.bold))])
                   ],
@@ -4727,7 +7737,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   children: [
                     Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(12)), child: Icon(Icons.info_outline, color: Colors.grey.shade600, size: 16)),
                     const SizedBox(width: 8),
-                    Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(12)), child: const Row(children: [Icon(Icons.location_on_outlined, color: Colors.white, size: 14), SizedBox(width: 4), Text('Live Tracking', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))])),
+                    GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OrderTrackingLiveScreen())), child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(12)), child: const Row(children: [Icon(Icons.location_on_outlined, color: Colors.white, size: 14), SizedBox(width: 4), Text('Live Tracking', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]))),
                   ],
                 )
               ],
@@ -4776,7 +7786,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   children: [
                     const Text('Botanical Casual Shirt', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
-                    Text('Size: L • Floral Hawaii Print', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    Text('Size: L â€¢ Floral Hawaii Print', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
                     const SizedBox(height: 4),
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('\$40.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text('Qty: 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.bold))])
                   ],
@@ -4793,7 +7803,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Total (1 item)', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)), const SizedBox(height: 2), const Text('\$40.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))]),
                 Row(
                   children: [
-                    Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.cyan.shade50, border: Border.all(color: Colors.cyan.shade100), borderRadius: BorderRadius.circular(12)), child: Row(children: [const Icon(Icons.star, color: Colors.orange, size: 14), const SizedBox(width: 4), Text('Review', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12, fontWeight: FontWeight.bold))])),
+                    GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WriteReviewScreen())), child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.cyan.shade50, border: Border.all(color: Colors.cyan.shade100), borderRadius: BorderRadius.circular(12)), child: Row(children: [const Icon(Icons.star, color: Colors.orange, size: 14), const SizedBox(width: 4), Text('Review', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12, fontWeight: FontWeight.bold))]))),
                     const SizedBox(width: 8),
                     Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(12)), child: Row(children: [Icon(Icons.refresh, color: Colors.grey.shade600, size: 14), const SizedBox(width: 4), Text('Reorder', style: TextStyle(color: Colors.grey.shade700, fontSize: 12, fontWeight: FontWeight.bold))])),
                   ],
@@ -4842,4 +7852,1622 @@ class CategoryItem extends StatelessWidget {
       )
     ); 
   } 
+}
+class OrderTrackingScreen extends StatelessWidget {
+  const OrderTrackingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(Icons.arrow_back_ios_new, size: 20),
+                  ),
+                  const SizedBox(width: 15),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Order Tracking', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('ORDER & LOGISTICS', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.share_outlined, size: 22, color: Colors.black87),
+                  const SizedBox(width: 15),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(color: Color(0xFF006C7A), shape: BoxShape.circle),
+                    child: const Icon(Icons.person, color: Colors.white, size: 16),
+                  ),
+                ],
+              ),
+            ),
+            
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Status pill
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(20)),
+                            child: const Text('ORDER #ORD-9284 ï¿½ Standard Shipping', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                          const Row(
+                            children: [
+                              Icon(Icons.help_outline, color: Color(0xFF0F8A9E), size: 16),
+                              SizedBox(width: 4),
+                              Text('Support', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold)),
+                            ],
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // Estimated Arrival Card
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(colors: [Colors.white, Color(0xFFE0F7FA)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('ESTIMATED ARRIVAL', style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                    const SizedBox(height: 4),
+                                    const Text('Tomorrow, Oct 18', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 2),
+                                    Text('Guaranteed by 14:00 PM', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                                  ],
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(20)),
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.circle, color: Colors.white, size: 8),
+                                      SizedBox(width: 4),
+                                      Text('IN TRANSIT', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.local_shipping_outlined, color: Color(0xFF0F8A9E), size: 24),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('FedEx Express', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                        Text('FDX-8829194', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(10)),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.copy, color: Colors.grey.shade600, size: 14),
+                                        const SizedBox(width: 4),
+                                        Text('Copy', style: TextStyle(color: Colors.grey.shade600, fontSize: 11, fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
+                      // Map Image
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Stack(
+                          children: [
+                            Image.network('https://picsum.photos/seed/map/600/300', height: 120, width: double.infinity, fit: BoxFit.cover),
+                            Positioned(
+                              bottom: 0, left: 0, right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(colors: [Colors.black.withOpacity(0.7), Colors.transparent], begin: Alignment.bottomCenter, end: Alignment.topCenter)
+                                ),
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(Icons.near_me_outlined, color: Colors.white, size: 16),
+                                        SizedBox(width: 6),
+                                        Text('Springfield Regional Hub (34m ago)', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                    Text('Route #IL-402', style: TextStyle(color: Colors.white70, fontSize: 10)),
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 30),
+                      
+                      // Shipment Timeline
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Shipment Timeline', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(4)), child: const Text('ON SCHEDULE', style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      _buildTimelineItem(true, true, Icons.check, Colors.green, 'Order Placed', 'Authorized via Aura Checkout', 'Oct 16, 10:30 AM'),
+                      _buildTimelineItem(true, true, Icons.check, Colors.green, 'Payment Confirmed', 'PayPal verified (\.00)', 'Oct 16, 10:32 AM'),
+                      _buildTimelineItem(true, true, Icons.check, Colors.green, 'Order Packed & Processed', 'Springfield Fulfillment Center', 'Oct 16, 16:45 PM'),
+                      _buildTimelineItem(true, false, Icons.warehouse, const Color(0xFF0F8A9E), 'At Distribution Hub', 'Springfield Regional Sorting Facility - Inbound scan processed', 'Today, 09:15 AM', isHighlight: true),
+                      _buildTimelineItem(false, false, Icons.local_shipping_outlined, Colors.grey.shade400, 'Out for Delivery', 'Local delivery courier dispatch', 'Oct 18, ~08:30 AM'),
+                      _buildTimelineItem(false, false, Icons.home_outlined, Colors.grey.shade400, 'Package Delivered', 'Recipient front door release', 'Oct 18, ~14:00 PM', isLast: true),
+                      
+                      const SizedBox(height: 30),
+                      
+                      // Delivery Destination
+                      const Row(
+                        children: [
+                          Icon(Icons.location_on_outlined, color: Color(0xFF0F8A9E), size: 20),
+                          SizedBox(width: 8),
+                          Text('Delivery Destination', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Cesc Fabregas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            const SizedBox(height: 4),
+                            Text('123 Main Street, Apt 4B\nSan Diego, CA 92101', style: TextStyle(color: Colors.grey.shade600, fontSize: 13, height: 1.4)),
+                            const SizedBox(height: 15),
+                            Row(
+                              children: [
+                                const Icon(Icons.notifications_active_outlined, color: Color(0xFF0F8A9E), size: 16),
+                                const SizedBox(width: 8),
+                                Expanded(child: Text('Instruction: "Ring doorbell twice upon arrival"', style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontStyle: FontStyle.italic))),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 30),
+                      
+                      // Package Contents
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.shopping_bag_outlined, color: Color(0xFF0F8A9E), size: 20),
+                              SizedBox(width: 8),
+                              Text('Package Contents', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(10)), child: const Text('2 Items', style: TextStyle(color: Colors.black87, fontSize: 10, fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      Container(
+                        padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                        child: Row(
+                          children: [
+                            ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.network('https://picsum.photos/seed/102/100/100', width: 50, height: 50, fit: BoxFit.cover)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Denim Classic Jacket', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  const SizedBox(height: 2),
+                                  Text('Size L ï¿½ Indigo Blue ï¿½ Qty 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                            const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          ],
+                        )
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                        child: Row(
+                          children: [
+                            ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.network('https://picsum.photos/seed/101/100/100', width: 50, height: 50, fit: BoxFit.cover)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Basic Eco-Cotton T-Shirt', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  const SizedBox(height: 2),
+                                  Text('Size M ï¿½ Chalk White ï¿½ Qty 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                            const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          ],
+                        )
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total Paid (Tax & Shipping incl.)', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                          const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            
+            // Bottom Action Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))]),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.headset_mic_outlined, size: 18),
+                        SizedBox(width: 8),
+                        Text('Help', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const OrderTrackingLiveScreen()));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00BCD4),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.map_outlined, color: Colors.white, size: 18),
+                          SizedBox(width: 8),
+                          Text('View Live Courier Map', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimelineItem(bool isDone, bool isLineSolid, IconData icon, Color color, String title, String sub, String time, {bool isLast = false, bool isHighlight = false}) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 32, height: 32,
+                decoration: BoxDecoration(
+                  color: isHighlight ? color : (isDone ? color : Colors.white),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: isDone || isHighlight ? color : Colors.grey.shade300, width: 2),
+                ),
+                child: Icon(icon, size: 16, color: isHighlight || isDone ? Colors.white : Colors.grey.shade400),
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: isLineSolid ? Colors.green : Colors.grey.shade300,
+                  ),
+                )
+            ],
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Container(
+              padding: isHighlight ? const EdgeInsets.all(12) : const EdgeInsets.only(bottom: 25, top: 4),
+              decoration: isHighlight ? BoxDecoration(color: const Color(0xFFF0FBFF), borderRadius: BorderRadius.circular(12)) : null,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: TextStyle(fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600, fontSize: 14, color: isDone || isHighlight ? Colors.black87 : Colors.grey.shade500)),
+                        const SizedBox(height: 4),
+                        Text(sub, style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  Text(time, style: TextStyle(color: isHighlight ? color : Colors.grey.shade500, fontSize: 11, fontWeight: isHighlight ? FontWeight.bold : FontWeight.normal)),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+class OrderTrackingLiveScreen extends StatelessWidget {
+  const OrderTrackingLiveScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(Icons.arrow_back_ios_new, size: 20),
+                  ),
+                  const SizedBox(width: 15),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Order Tracking', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('ORDER & LOGISTICS', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.share_outlined, size: 22, color: Colors.black87),
+                  const SizedBox(width: 15),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(color: Color(0xFF006C7A), shape: BoxShape.circle),
+                    child: const Icon(Icons.person, color: Colors.white, size: 16),
+                  ),
+                ],
+              ),
+            ),
+            
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Status pill
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(20)),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.circle, color: Colors.green, size: 8),
+                                SizedBox(width: 6),
+                                Text('ORDER #ORD-8910 ï¿½ EXPRESS', style: TextStyle(color: Colors.black87, fontSize: 10, fontWeight: FontWeight.bold)),
+                              ],
+                            )
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(20)),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.bolt, color: Colors.green, size: 14),
+                                SizedBox(width: 4),
+                                Text('Live GPS', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      // Live Map Card
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Stack(
+                          children: [
+                            Image.network('https://picsum.photos/seed/map3/600/500', height: 250, width: double.infinity, fit: BoxFit.cover),
+                            Container(height: 250, width: double.infinity, color: const Color(0xFFE8EAF6).withOpacity(0.5)),
+                            // Faux Map details
+                            Positioned(
+                              top: 20, left: 20,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.circle, color: Color(0xFF00BCD4), size: 10),
+                                    const SizedBox(width: 6),
+                                    const Text('Arriving in ~25 mins', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                    const SizedBox(width: 6),
+                                    Text('ï¿½ 1.8 mi away', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 20, right: 20,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.traffic_outlined, color: Colors.green, size: 14),
+                                    SizedBox(width: 4),
+                                    Text('Light', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Map Markers
+                            const Positioned(
+                              top: 90, left: 160,
+                              child: Icon(Icons.location_on, color: Color(0xFF006C7A), size: 30),
+                            ),
+                            const Positioned(
+                              top: 150, left: 240,
+                              child: Icon(Icons.location_on, color: Colors.red, size: 30),
+                            ),
+                            Positioned(
+                              bottom: 20, right: 20,
+                              child: Column(
+                                children: [
+                                  Container(padding: const EdgeInsets.all(8), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)]), child: const Icon(Icons.my_location, size: 20)),
+                                  const SizedBox(height: 10),
+                                  Container(padding: const EdgeInsets.all(8), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)]), child: const Icon(Icons.add, size: 20)),
+                                  const SizedBox(height: 5),
+                                  Container(padding: const EdgeInsets.all(8), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)]), child: const Icon(Icons.remove, size: 20)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
+                      // Courier Info Card
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)]),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Stack(
+                                  children: [
+                                    ClipRRect(borderRadius: BorderRadius.circular(25), child: Image.network('https://picsum.photos/seed/dave/100/100', width: 50, height: 50, fit: BoxFit.cover)),
+                                    Positioned(bottom: 0, right: 0, child: Container(padding: const EdgeInsets.all(2), decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle), child: const Icon(Icons.check_circle, color: Colors.green, size: 14))),
+                                  ],
+                                ),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Row(
+                                        children: [
+                                          Text('Dave Miller', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                          SizedBox(width: 4),
+                                          Icon(Icons.verified, color: Color(0xFF0F8A9E), size: 14),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.star, color: Colors.orange, size: 12),
+                                          const SizedBox(width: 4),
+                                          const Text('4.9', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                          Text(' (420+ trips)', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text('Honda PCX160 ï¿½ CA8K...', style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF0F8A9E), size: 20)),
+                                    const SizedBox(width: 10),
+                                    Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.phone_outlined, color: Colors.white, size: 20)),
+                                  ],
+                                )
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                              decoration: BoxDecoration(color: const Color(0xFFF0FBFF), borderRadius: BorderRadius.circular(16)),
+                              child: Row(
+                                children: [
+                                  Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.cyan.shade100, shape: BoxShape.circle), child: const Icon(Icons.location_on_outlined, color: Color(0xFF0F8A9E), size: 16)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('You are the next delivery stop!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                        Text('Dave just completed 3 of 4 neighborhood...', style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 25),
+                      
+                      // Route Progress
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)]),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Route Progress', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(10)), child: const Text('Stage 3 of 4', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold))),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            
+                            _buildExpressTimeline(true, Icons.check, Colors.green, 'Order Packed & Prepared', 'Pacific Distribution Hub ï¿½ 9:15 AM', false),
+                            _buildExpressTimeline(true, Icons.check, Colors.green, 'Courier Picked Up', 'Dave Miller on route ï¿½ 9:32 AM', false),
+                            _buildExpressTimeline(true, Icons.circle, const Color(0xFF00BCD4), 'Out for Delivery', 'Navigating Evergreen Terr. toward 123 Main St.', true, isCurrent: true),
+                            _buildExpressTimeline(false, Icons.circle, Colors.grey.shade300, 'Delivered & Handed Over', 'Expected by 10:05 AM', false, isLast: true),
+                            
+                            const SizedBox(height: 15),
+                            Container(
+                              padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(16)),
+                              child: Row(
+                                children: [
+                                  ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.network('https://picsum.photos/seed/103/100/100', width: 40, height: 40, fit: BoxFit.cover)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Cargo Utility Pants', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                        Text('Size 32 ï¿½ Olive Green', style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
+                                      ],
+                                    ),
+                                  ),
+                                  const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                ],
+                              )
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 25),
+                      
+                      // Handover Security
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.lock_outline, color: Colors.black87, size: 20),
+                              SizedBox(width: 8),
+                              Text('Handover Security', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(10)), child: const Row(children: [Icon(Icons.verified_user_outlined, color: Color(0xFF0F8A9E), size: 10), SizedBox(width: 4), Text('VERIFIED', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold))])),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      Container(
+                        padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(16)),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.contactless_outlined, color: Color(0xFF0F8A9E), size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Contactless Drop-off', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  const SizedBox(height: 4),
+                                  Text('Leave at front door or hand directly to resident. Ring doorbell upon leaving.', style: TextStyle(color: Colors.grey.shade600, fontSize: 11, height: 1.3)),
+                                ],
+                              ),
+                            )
+                          ],
+                        )
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15), decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('DELIVERY SECURITY PIN', style: TextStyle(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                const SizedBox(height: 4),
+                                Text('Share with Dave upon arrival', style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)]),
+                              child: const Text('4  9  2  0', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                            )
+                          ],
+                        )
+                      ),
+                      
+                      const SizedBox(height: 30),
+                      
+                      // Action button
+                      SizedBox(
+                        width: double.infinity, height: 55,
+                        child: ElevatedButton(
+                          onPressed: () { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reset code sent!'))); Navigator.pop(context); },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00BCD4),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.ios_share, color: Colors.white, size: 18),
+                              SizedBox(width: 8),
+                              Text('Share Live Location / ETA', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Center(child: Text('Automatic SMS updates will be sent when courier is 2 minutes\naway.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500, fontSize: 10, height: 1.5))),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpressTimeline(bool isDone, IconData icon, Color color, String title, String sub, bool isHighlight, {bool isLast = false, bool isCurrent = false}) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 24, height: 24,
+                decoration: BoxDecoration(
+                  color: isCurrent ? Colors.white : color,
+                  shape: BoxShape.circle,
+                  border: isCurrent ? Border.all(color: color, width: 4) : null,
+                ),
+                child: !isCurrent ? Icon(icon, size: 14, color: Colors.white) : null,
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: isCurrent ? Colors.grey.shade200 : color, // after current it's grey
+                  ),
+                )
+            ],
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(title, style: TextStyle(fontWeight: isCurrent || isDone ? FontWeight.bold : FontWeight.normal, fontSize: 13, color: isCurrent || isDone ? Colors.black87 : Colors.grey.shade500)),
+                      if (isCurrent) ...[
+                        const SizedBox(width: 8),
+                        Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(10)), child: const Text('CURRENT', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 9, fontWeight: FontWeight.bold))),
+                      ]
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(sub, style: TextStyle(color: isCurrent ? Colors.black87 : Colors.grey.shade500, fontSize: 11)),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+class WriteReviewScreen extends StatelessWidget {
+  const WriteReviewScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(Icons.arrow_back, size: 20),
+                  ),
+                  const SizedBox(width: 15),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Write a Review', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('ORDER #ORD-7741 ï¿½ DELIVERED', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.help_outline, size: 20, color: Colors.black87),
+                ],
+              ),
+            ),
+            
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      // Product Card
+                      Container(
+                        padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                        child: Row(
+                          children: [
+                            ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.network('https://picsum.photos/seed/104/100/100', width: 55, height: 55, fit: BoxFit.cover)),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Botanical Casual Shirt', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))]),
+                                  const SizedBox(height: 2),
+                                  Text('Size: L ï¿½ Floral Hawaii Print', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                  const SizedBox(height: 6),
+                                  Row(children: [const Icon(Icons.check_circle, color: Colors.green, size: 12), const SizedBox(width: 4), Text('Delivered on Oct 12, 2024', style: TextStyle(color: Colors.grey.shade600, fontSize: 10, fontWeight: FontWeight.bold))])
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
+                      // Rating Card
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(25), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+                        child: Column(
+                          children: [
+                            Text('PRODUCT SATISFACTION', style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                            const SizedBox(height: 10),
+                            const Text('How was your product?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text('Tap the stars to adjust your overall impression', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(5, (index) => const Padding(padding: EdgeInsets.symmetric(horizontal: 4), child: Icon(Icons.star, color: Colors.amber, size: 36))),
+                            ),
+                            const SizedBox(height: 20),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(20)),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.verified, color: Color(0xFF0F8A9E), size: 14),
+                                  SizedBox(width: 6),
+                                  Text('5.0 ï¿½ Excellent! Highly recommended', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
+                      // Detailed Impressions
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Detailed Impressions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                Text('Step 2 of 3', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            
+                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Fit & Sizing', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text('True to Size (L)', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 11))]),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(child: Container(padding: const EdgeInsets.symmetric(vertical: 12), alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(10)), child: const Text('Runs Small', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black54)))),
+                                const SizedBox(width: 10),
+                                Expanded(child: Container(padding: const EdgeInsets.symmetric(vertical: 12), alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(10)), child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.check, color: Colors.white, size: 14), SizedBox(width: 4), Text('True to Size', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white))]))),
+                                const SizedBox(width: 10),
+                                Expanded(child: Container(padding: const EdgeInsets.symmetric(vertical: 12), alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(10)), child: const Text('Runs Large', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black54)))),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            
+                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Fabric & Breathability', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text('Soft & Breathable', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 11))]),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(child: Container(padding: const EdgeInsets.symmetric(vertical: 12), alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(10)), child: const Text('Rough', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black54)))),
+                                const SizedBox(width: 10),
+                                Expanded(child: Container(padding: const EdgeInsets.symmetric(vertical: 12), alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(10)), child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.check, color: Colors.white, size: 14), SizedBox(width: 4), Text('Soft & Airy', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white))]))),
+                                const SizedBox(width: 10),
+                                Expanded(child: Container(padding: const EdgeInsets.symmetric(vertical: 12), alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(10)), child: const Text('Silk Feel', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.black54)))),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            
+                            const Text('Color & Visual Accuracy', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12), decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(12)),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Exact match with photo gallery', style: TextStyle(fontSize: 12, color: Colors.black87)),
+                                  Icon(Icons.check_circle_outline, color: Colors.green, size: 18),
+                                ],
+                              )
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
+                      // Add Photos
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Add Photos or Video', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(10)), child: const Text('+10 Pts', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold))),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text('Help others see the real texture & fit (2/5)', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                            const SizedBox(height: 15),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 70, height: 70, decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
+                                  child: const Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.camera_alt_outlined, color: Color(0xFF0F8A9E), size: 24), SizedBox(height: 4), Text('Add Media', style: TextStyle(color: Colors.black54, fontSize: 9, fontWeight: FontWeight.bold))]),
+                                ),
+                                const SizedBox(width: 10),
+                                Stack(
+                                  children: [
+                                    ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.network('https://picsum.photos/seed/201/100/100', width: 70, height: 70, fit: BoxFit.cover)),
+                                    Positioned(top: 4, right: 4, child: Container(padding: const EdgeInsets.all(2), decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle), child: const Icon(Icons.close, color: Colors.white, size: 10))),
+                                    Positioned(bottom: 4, left: 4, child: Container(padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2), decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(4)), child: const Text('Photo', style: TextStyle(color: Colors.white, fontSize: 8)))),
+                                  ],
+                                ),
+                                const SizedBox(width: 10),
+                                Stack(
+                                  children: [
+                                    ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.network('https://picsum.photos/seed/202/100/100', width: 70, height: 70, fit: BoxFit.cover)),
+                                    Positioned(top: 4, right: 4, child: Container(padding: const EdgeInsets.all(2), decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle), child: const Icon(Icons.close, color: Colors.white, size: 10))),
+                                    Positioned(bottom: 4, left: 4, child: Container(padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2), decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(4)), child: const Text('Detail', style: TextStyle(color: Colors.white, fontSize: 8)))),
+                                  ],
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
+                      // Your Thoughts
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Your Thoughts', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                Text('168 / 500', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            Container(
+                              padding: const EdgeInsets.all(15), decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(16)),
+                              child: Column(
+                                children: [
+                                  TextField(
+                                    maxLines: 4,
+                                    decoration: const InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: 'Share your experience with this product...',
+                                    ),
+                                    style: const TextStyle(fontSize: 13, height: 1.5),
+                                    controller: TextEditingController.fromValue(const TextEditingValue(text: 'The fabric is super lightweight and comfortable for tropical weather! The floral print looks even more vibrant in person. Fits perfectly on size L. Will definitely order again.')),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.sentiment_very_satisfied, color: Colors.green, size: 16),
+                                          const SizedBox(width: 4),
+                                          Text('High detail review!', style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+                                        ],
+                                      ),
+                                      const Row(
+                                        children: [
+                                          Icon(Icons.auto_fix_high, color: Color(0xFF0F8A9E), size: 16),
+                                          SizedBox(width: 4),
+                                          Text('Polish', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold)),
+                                        ],
+                                      )
+                                    ],
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
+                      // Courier & Delivery
+                      Container(
+                        padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), child: const Icon(Icons.local_shipping_outlined, color: Color(0xFF0F8A9E), size: 18)),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Courier & Delivery', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                      Text('Aura Express ï¿½ 2-Day Priority', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                    ],
+                                  ),
+                                ),
+                                Row(children: List.generate(5, (index) => const Icon(Icons.star, color: Colors.amber, size: 14))),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12), decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(12)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('"Fast 2-day delivery & polite courier"', style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
+                                  Icon(Icons.check_circle_outline, color: Colors.green.shade400, size: 16),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
+                      // Display Name toggle
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                        child: Row(
+                          children: [
+                            Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFFF0F5FF), shape: BoxShape.circle), child: const Icon(Icons.badge_outlined, color: Color(0xFF0F8A9E), size: 18)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Display Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  Text('Show as Cesc F. (Verified Buyer)', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                ],
+                              ),
+                            ),
+                            Switch(value: true, activeColor: const Color(0xFF006C7A), onChanged: (v){}),
+                          ],
+                        )
+                      ),
+                      
+                      const SizedBox(height: 30),
+                      
+                      // Submit Button
+                      SizedBox(
+                        width: double.infinity, height: 55,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4DD0E1), // Cyan lighter
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('Submit Review & Earn 50 Points', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
+                              SizedBox(width: 8),
+                              Icon(Icons.arrow_forward, color: Colors.black87, size: 18),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.lock_outline, color: Colors.grey, size: 12),
+                          SizedBox(width: 4),
+                          Text('Your verified review helps millions shop with confidence', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+class CustomerSupportChatScreen extends StatelessWidget {
+  const CustomerSupportChatScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F9FD),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top Nav
+            Container(
+              padding: const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 15),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 2))]
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(color: Colors.grey.shade50, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                              child: const Icon(Icons.arrow_back_ios_new, size: 16, color: Colors.black87),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Avatar
+                          Stack(
+                            children: [
+                              Container(
+                                width: 40, height: 40,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: const Color(0xFF00B4D8).withOpacity(0.3), width: 2),
+                                ),
+                                child: ClipOval(child: Image.network('https://picsum.photos/seed/sarah/100/100', fit: BoxFit.cover)),
+                              ),
+                              Positioned(
+                                bottom: 0, right: 0,
+                                child: Container(width: 12, height: 12, decoration: BoxDecoration(color: Colors.green, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2))),
+                              )
+                            ],
+                          ),
+                          const SizedBox(width: 12),
+                          // Name & Status
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Text('Sarah Jenkins', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
+                                  SizedBox(width: 4),
+                                  Icon(Icons.check_circle, color: Colors.lightBlue, size: 14),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
+                                  const SizedBox(width: 4),
+                                  const Text('Online', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold)),
+                                  Text(' � Replies <1m', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                ],
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 36, height: 36,
+                            decoration: BoxDecoration(color: Colors.grey.shade50, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                            child: const Icon(Icons.phone_outlined, size: 18, color: Color(0xFF0096C7)),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 36, height: 36,
+                            decoration: BoxDecoration(color: Colors.grey.shade50, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                            child: const Icon(Icons.more_vert, size: 18, color: Colors.black87),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Context Chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [Color(0xFFE0F7FA), Color(0xFFE3F2FD)]),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.cyan.shade100)
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: const Color(0xFF00B4D8).withOpacity(0.15), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF0096C7), size: 14)),
+                            const SizedBox(width: 10),
+                            const Text('Order #ORD-9284', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                            const Text(' � ', style: TextStyle(color: Colors.grey)),
+                            const Text('In Transit (Denim Jacket)', style: TextStyle(color: Color(0xFF00838F), fontSize: 12, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.cyan.shade200)),
+                          child: const Row(
+                            children: [
+                              Text('View', style: TextStyle(color: Color(0xFF0096C7), fontSize: 11, fontWeight: FontWeight.bold)),
+                              Icon(Icons.chevron_right, color: Color(0xFF0096C7), size: 14)
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+            
+            // Chat Stream
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(15),
+                children: [
+                  // Date
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(color: Colors.grey.shade200.withOpacity(0.7), borderRadius: BorderRadius.circular(20)),
+                      child: Text('TODAY, 10:24 AM', style: TextStyle(color: Colors.grey.shade600, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  
+                  // Security Notice
+                  Center(
+                    child: Container(
+                      width: 280,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10)]),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.verified_user, color: Color(0xFF00B4D8), size: 16),
+                          SizedBox(width: 8),
+                          Expanded(child: Text('Cescrafli Priority Support. Conversations are encrypted & verified.', style: TextStyle(color: Colors.black54, fontSize: 11, fontWeight: FontWeight.w500))),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Agent Message 1
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      ClipOval(child: Image.network('https://picsum.photos/seed/sarah/100/100', width: 24, height: 24, fit: BoxFit.cover)),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomRight: Radius.circular(16), bottomLeft: Radius.circular(4)), border: Border.all(color: Colors.grey.shade200), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 5)]),
+                            child: RichText(
+                              text: const TextSpan(
+                                style: TextStyle(color: Colors.black87, fontSize: 13, height: 1.4, fontFamily: 'Roboto'),
+                                children: [
+                                  TextSpan(text: 'Hi Cesc! ?? Thank you for reaching out to Cescrafli Priority Support. I see you\'re inquiring about your recent order '),
+                                  TextSpan(text: '#ORD-9284', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  TextSpan(text: '. How can I assist you today?'),
+                                ]
+                              )
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text('10:24 AM', style: TextStyle(color: Colors.grey.shade400, fontSize: 10, fontWeight: FontWeight.w500)),
+                        ],
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  
+                  // Quick Pills
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 32), // indent
+                        _buildQuickPill('??', 'Track my package', true),
+                        const SizedBox(width: 8),
+                        _buildQuickPill('??', 'Change address', true),
+                        const SizedBox(width: 8),
+                        _buildQuickPill('??', 'Invoice copy', false),
+                        const SizedBox(width: 8),
+                        _buildQuickPill('??', 'Exchange size', false),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // User Message
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(colors: [Color(0xFF00B4D8), Color(0xFF0096C7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomLeft: Radius.circular(16), bottomRight: Radius.circular(4)),
+                              boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]
+                            ),
+                            child: const Text('Hi Sarah! I wanted to check if the courier can leave the package at my front door if I\'m not home by 2 PM?', style: TextStyle(color: Colors.white, fontSize: 13, height: 1.4)),
+                          ),
+                          const SizedBox(height: 4),
+                          const Row(
+                            children: [
+                              Text('10:25 AM', style: TextStyle(color: Colors.black38, fontSize: 10, fontWeight: FontWeight.w500)),
+                              SizedBox(width: 4),
+                              Icon(Icons.done_all, color: Color(0xFF00B4D8), size: 14),
+                            ],
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Agent Response 2
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      ClipOval(child: Image.network('https://picsum.photos/seed/sarah/100/100', width: 24, height: 24, fit: BoxFit.cover)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomRight: Radius.circular(16), bottomLeft: Radius.circular(4)), border: Border.all(color: Colors.grey.shade200), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 5)]),
+                              child: RichText(
+                                text: const TextSpan(
+                                  style: TextStyle(color: Colors.black87, fontSize: 13, height: 1.4, fontFamily: 'Roboto'),
+                                  children: [
+                                    TextSpan(text: 'Absolutely! I can update your delivery handover instructions directly in the system for courier '),
+                                    TextSpan(text: 'Dave Miller', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    TextSpan(text: '.'),
+                                  ]
+                                )
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Rich Card
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)]),
+                              child: Column(
+                                children: [
+                                  // Product
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade100)),
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network('https://picsum.photos/seed/jacket/100/100', width: 45, height: 45, fit: BoxFit.cover)),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Denim Classic Jacket', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]),
+                                              const Text('Size L � Indigo Blue', style: TextStyle(color: Colors.black54, fontSize: 11)),
+                                              const SizedBox(height: 4),
+                                              Row(children: [const Icon(Icons.two_wheeler, color: Colors.lightBlue, size: 12), const SizedBox(width: 4), Text('Arriving Today, ~2:30 PM', style: TextStyle(color: Colors.lightBlue.shade700, fontSize: 10, fontWeight: FontWeight.bold))])
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  // Instruction Status
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(color: const Color(0xFFE0F7FA).withOpacity(0.7), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.cyan.shade100)),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(width: 24, height: 24, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle), child: const Icon(Icons.check, color: Colors.white, size: 14)),
+                                            const SizedBox(width: 8),
+                                            const Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text('Front Door Drop-off', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                                Text('Instruction dispatched to Dave', style: TextStyle(color: Colors.black54, fontSize: 10)),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                        Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.green.shade100, borderRadius: BorderRadius.circular(6)), child: Text('Confirmed', style: TextStyle(color: Colors.green.shade800, fontSize: 10, fontWeight: FontWeight.bold)))
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Divider(height: 1),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text('Security PIN bypass authorized', style: TextStyle(color: Colors.black54, fontSize: 11)),
+                                      Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(4)), child: const Text('#4920', style: TextStyle(color: Color(0xFF0096C7), fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'monospace'))),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Follow up text
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomRight: Radius.circular(16), bottomLeft: Radius.circular(4)), border: Border.all(color: Colors.grey.shade200), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 5)]),
+                              child: RichText(
+                                text: const TextSpan(
+                                  style: TextStyle(color: Colors.black87, fontSize: 13, height: 1.4, fontFamily: 'Roboto'),
+                                  children: [
+                                    TextSpan(text: 'I\'ve tagged order #ORD-9284 as '),
+                                    TextSpan(text: '"Safe Contactless Front Porch Drop-off"', style: TextStyle(fontWeight: FontWeight.w600)),
+                                    TextSpan(text: '. You\'ll receive a confirmation photo as soon as it\'s delivered!'),
+                                  ]
+                                )
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Text('Was this resolution helpful?', style: TextStyle(color: Colors.black54, fontSize: 10, fontWeight: FontWeight.w500)),
+                                const SizedBox(width: 8),
+                                _buildFeedbackBtn('??'),
+                                const SizedBox(width: 4),
+                                _buildFeedbackBtn('??'),
+                                const SizedBox(width: 8),
+                                Text('10:26 AM', style: TextStyle(color: Colors.grey.shade400, fontSize: 10, fontWeight: FontWeight.w500)),
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+            
+            // Input Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: Colors.grey.shade100))),
+              child: Row(
+                children: [
+                  Container(width: 40, height: 40, decoration: const BoxDecoration(color: Color(0xFFF1F5F9), shape: BoxShape.circle), child: const Icon(Icons.attach_file, color: Colors.black54, size: 20)),
+                  const SizedBox(width: 8),
+                  Container(width: 40, height: 40, decoration: const BoxDecoration(color: Color(0xFFF1F5F9), shape: BoxShape.circle), child: const Icon(Icons.camera_alt_outlined, color: Colors.black54, size: 20)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      height: 40,
+                      decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(20)),
+                      child: const TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Type your message...',
+                          hintStyle: TextStyle(color: Colors.black38, fontSize: 13),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                          suffixIcon: Icon(Icons.sentiment_satisfied_alt, color: Colors.black38, size: 20),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [Color(0xFF00B4D8), Color(0xFF0096C7)]),
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4))]
+                    ),
+                    child: const Icon(Icons.send, color: Colors.white, size: 18),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickPill(String emoji, String text, bool isCyan) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isCyan ? const Color(0xFF00B4D8).withOpacity(0.5) : Colors.grey.shade300),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 2)]
+      ),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 12)),
+          const SizedBox(width: 6),
+          Text(text, style: TextStyle(color: isCyan ? const Color(0xFF0077B6) : Colors.black87, fontSize: 12, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeedbackBtn(String emoji) {
+    return Container(
+      width: 24, height: 24,
+      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 2)]),
+      alignment: Alignment.center,
+      child: Text(emoji, style: const TextStyle(fontSize: 10)),
+    );
+  }
 }
