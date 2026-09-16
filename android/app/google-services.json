@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "663051170103",
+    "project_id": "cesc-commerce",
+    "storage_bucket": "cesc-commerce.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:663051170103:android:9ca4a1f3af04465b5aaab2",
+        "android_client_info": {
+          "package_name": "com.example.cesc_commerce"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIutP51v_UR1K6moaoiz17Vr3tk74Zn6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

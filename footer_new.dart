@@ -1,1116 +1,6 @@
-﻿import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/providers.dart';
-import 'core/models.dart';
-import 'core/services/auth_service.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp(options: const FirebaseOptions(apiKey: 'AIzaSyBIutP51v_UR1K6moaoiz17Vr3tk74Zn6c', appId: '1:663051170103:android:9ca4a1f3af04465b5aaab2', messagingSenderId: '663051170103', projectId: 'cesc-commerce', storageBucket: 'cesc-commerce.firebasestorage.app'));
-  } catch(e) { print('Firebase Error: $e'); }
-  runApp(const ProviderScope(child: CescCommerceApp()));
-}
-
+﻿// ----------------------------------------------------------------------
+// WIDGET UTAMA (BOTTOM NAVIGATION)
 // ----------------------------------------------------------------------
-// STATE MANAGEMENT GLOBAL (Sederhana)
-// ----------------------------------------------------------------------
-final ValueNotifier<List<Map<String, dynamic>>> globalCart = ValueNotifier([]);
-final ValueNotifier<List<Map<String, dynamic>>> globalWishlist = ValueNotifier([]);
-
-void toggleWishlist(String title, String subtitle, String price, String imageUrl, BuildContext context) {
-  final current = List<Map<String, dynamic>>.from(globalWishlist.value);
-  final index = current.indexWhere((item) => item['title'] == title);
-  if (index >= 0) {
-    current.removeAt(index);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Removed from wishlist'), duration: Duration(seconds: 1)));
-  } else {
-    current.add({'title': title, 'subtitle': subtitle, 'price': price, 'image': imageUrl});
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to wishlist!'), backgroundColor: Color(0xFF18C5DF), duration: Duration(seconds: 1)));
-  }
-  globalWishlist.value = current;
-}
-
-void addToCart(String title, String subtitle, String priceStr, String image, BuildContext context) {
-  double price = 0.0;
-  try { price = double.parse(priceStr.replaceAll('\$', '').trim()); } catch (e) { price = 10.0; }
-
-  final currentCart = List<Map<String, dynamic>>.from(globalCart.value);
-  int existingIndex = currentCart.indexWhere((item) => item['title'] == title);
-  
-  if (existingIndex >= 0) { currentCart[existingIndex]['qty']++; } 
-  else { currentCart.add({'title': title, 'subtitle': subtitle, 'price': price, 'qty': 1, 'image': image}); }
-  
-  globalCart.value = currentCart;
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('$title added to cart!'), backgroundColor: const Color(0xFF18C5DF), duration: const Duration(seconds: 1))
-  );
-}
-
-void updateCartItemQty(int index, int change) {
-  final currentCart = List<Map<String, dynamic>>.from(globalCart.value);
-  currentCart[index]['qty'] += change;
-  if (currentCart[index]['qty'] <= 0) { currentCart.removeAt(index); }
-  globalCart.value = currentCart;
-}
-
-void removeCartItem(int index) {
-  final currentCart = List<Map<String, dynamic>>.from(globalCart.value);
-  currentCart.removeAt(index);
-  globalCart.value = currentCart;
-}
-
-class CescCommerceApp extends StatelessWidget {
-  const CescCommerceApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Cescrafli',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        // WARNA UTAMA DIUBAH KE CYAN SESUAI LOGO BARU
-        primaryColor: const Color(0xFF18C5DF),
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF18C5DF)),
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF9F9F9),
-        fontFamily: 'Roboto',
-      ),
-      home: const SplashScreen(), 
-    );
-  }
-}
-
-// ----------------------------------------------------------------------
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.8, end: 1.1).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-    
-    // Navigate after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFE0F7FA), Color(0xFFF0F9FF), Colors.white],
-            stops: [0.0, 0.4, 1.0],
-          ),
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Decorative background blurs
-            Positioned(top: -50, right: -50, child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.2), blurRadius: 100, spreadRadius: 50)]))),
-            Positioned(bottom: -50, left: -50, child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF81D4FA).withOpacity(0.2), blurRadius: 100, spreadRadius: 50)]))),
-            
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 3),
-                // Logo with pulsing glow
-                AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Transform.scale(
-                          scale: _animation.value,
-                          child: Container(
-                            width: 120, height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.3), blurRadius: 40, spreadRadius: 10)],
-                            ),
-                          ),
-                        ),
-                        child!,
-                      ],
-                    );
-                  },
-                  child: Container(
-                    width: 100, height: 100,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(28), border: Border.all(color: Colors.cyan.shade100), boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.15), blurRadius: 30, offset: const Offset(0, 10))]),
-                    child: Image.asset('assets/images/logo_icon.png', fit: BoxFit.contain),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                const Text('cescrafli', style: TextStyle(color: Color(0xFF03045E), fontSize: 32, fontWeight: FontWeight.bold, letterSpacing: -1)),
-                const Text('E-COMMERCE SOLUTION', style: TextStyle(color: Color(0xFF00B4D8), fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2)),
-                const SizedBox(height: 25),
-                const Text('Smart, Seamless & Modern\nE-Commerce Solution', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontSize: 14, fontWeight: FontWeight.w500, height: 1.4)),
-                const Spacer(flex: 2),
-                
-                // Loading & Footer
-                const SizedBox(
-                  width: 35, height: 35,
-                  child: CircularProgressIndicator(color: Color(0xFF00B4D8), strokeWidth: 3),
-                ),
-                const SizedBox(height: 20),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.shield_outlined, color: Color(0xFF00B4D8), size: 14),
-                    SizedBox(width: 6),
-                    Text('Secured Ã¯Â¿Â½ Version 2.4.0', style: TextStyle(color: Colors.black45, fontSize: 12, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                const SizedBox(height: 40),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-class LanguageSelector extends StatefulWidget {
-  final Color bgColor;
-  final Color textColor;
-  final bool showLanguageIcon;
-
-  const LanguageSelector({
-    super.key,
-    this.bgColor = Colors.white,
-    this.textColor = Colors.black,
-    this.showLanguageIcon = false,
-  });
-
-  @override
-  State<LanguageSelector> createState() => _LanguageSelectorState();
-}
-
-class _LanguageSelectorState extends State<LanguageSelector> {
-  String _selectedLanguage = 'EN (US)';
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: widget.bgColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
-      child: PopupMenuButton<String>(
-        onSelected: (String value) {
-          setState(() {
-            _selectedLanguage = value;
-          });
-        },
-        offset: const Offset(0, 40),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-          const PopupMenuItem<String>(value: 'EN (US)', child: Text('EN (US) - English')),
-          const PopupMenuItem<String>(value: 'ID (ID)', child: Text('ID (ID) - Indonesia')),
-          const PopupMenuItem<String>(value: 'ES (ES)', child: Text('ES (ES) - Espanol')),
-          const PopupMenuItem<String>(value: 'ZH (CN)', child: Text('ZH (CN) - Chinese')),
-        ],
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (widget.showLanguageIcon)
-                const Icon(Icons.language, color: Color(0xFF006C7A), size: 14)
-              else
-                const Icon(Icons.circle, color: Color(0xFF00BCD4), size: 8),
-              const SizedBox(width: 6),
-              Text(_selectedLanguage, style: TextStyle(color: widget.textColor, fontWeight: FontWeight.bold, fontSize: 12)),
-              const SizedBox(width: 4),
-              Icon(Icons.arrow_drop_down, color: widget.textColor, size: 16),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAF8FF),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Nav
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.circle, color: Color(0xFF00BCD4), size: 8),
-                        SizedBox(width: 6),
-                        Text('EN (US)', style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 11)),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-                    child: const Text('SKIP', style: TextStyle(color: Colors.black38, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1)),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Hero Illustration
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 280,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFE0F7FA), Colors.white, Color(0xFFF0F9FF)]),
-                        borderRadius: BorderRadius.circular(32),
-                        border: Border.all(color: Colors.cyan.shade100.withOpacity(0.6)),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, offset: const Offset(0, 10))]
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Badges
-                          Positioned(
-                            top: 20, left: 20,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(color: Colors.white.withOpacity(0.95), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
-                              child: Row(
-                                children: [
-                                  Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.amber.shade50, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.bolt, color: Colors.amber, size: 16)),
-                                  const SizedBox(width: 8),
-                                  const Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Flash Deals', style: TextStyle(color: Colors.black45, fontSize: 9, fontWeight: FontWeight.bold)),
-                                      Text('Up to 70% Off', style: TextStyle(color: Colors.black87, fontSize: 11, fontWeight: FontWeight.bold)),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            )
-                          ),
-                          Positioned(
-                            bottom: 20, right: 20,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(color: Colors.white.withOpacity(0.95), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade100), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
-                              child: Row(
-                                children: [
-                                  Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.local_shipping, color: Color(0xFF00B4D8), size: 16)),
-                                  const SizedBox(width: 8),
-                                  const Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Delivery', style: TextStyle(color: Colors.black45, fontSize: 9, fontWeight: FontWeight.bold)),
-                                      Text('Fast & Tracked', style: TextStyle(color: Colors.black87, fontSize: 11, fontWeight: FontWeight.bold)),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            )
-                          ),
-                          // Center Logo
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 90, height: 90,
-                                padding: const EdgeInsets.all(15),
-                                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), border: Border.all(color: Colors.cyan.shade100), boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.2), blurRadius: 25, offset: const Offset(0, 10))]),
-                                child: Image.asset('assets/images/logo_icon.png', fit: BoxFit.contain),
-                              ),
-                              const SizedBox(height: 15),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(color: Colors.white.withOpacity(0.8), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.cyan.shade100)),
-                                child: const Text('CESCRAFLI', style: TextStyle(color: Color(0xFF00B4D8), fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2)),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Text Content
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(width: 25, height: 6, decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF00B4D8), Color(0xFF00BCD4)]), borderRadius: BorderRadius.circular(3), boxShadow: [BoxShadow(color: const Color(0xFF00B4D8).withOpacity(0.3), blurRadius: 5)])),
-                      const SizedBox(width: 6),
-                      Container(width: 6, height: 6, decoration: BoxDecoration(color: Colors.grey.shade300, shape: BoxShape.circle)),
-                      const SizedBox(width: 6),
-                      Container(width: 6, height: 6, decoration: BoxDecoration(color: Colors.grey.shade300, shape: BoxShape.circle)),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-                  const Text('Discover Trendy Fashion,\nDelivered Instantly', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, height: 1.2, color: Color(0xFF0F172A))),
-                  const SizedBox(height: 15),
-                  const Text('Explore thousands of curated clothing collections, seamless checkouts, and real-time live GPS courier tracking.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontSize: 13, height: 1.5)),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildFeaturePill(Icons.check, '100% Original'),
-                      const SizedBox(width: 8),
-                      _buildFeaturePill(Icons.security, 'Secure Pay'),
-                      const SizedBox(width: 8),
-                      _buildFeaturePill(Icons.replay, 'Easy Return'),
-                    ],
-                  ),
-                  const SizedBox(height: 35),
-                  
-                  // Buttons
-                  SizedBox(
-                    width: double.infinity, height: 55,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00B4D8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 8,
-                        shadowColor: const Color(0xFF00B4D8).withOpacity(0.4)
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Get Started', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward, color: Colors.white, size: 18),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Already have an account? ", style: TextStyle(color: Colors.black54, fontSize: 13)),
-                      GestureDetector(
-                        onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-                        child: const Text('Log In', style: TextStyle(color: Color(0xFF0096C7), fontWeight: FontWeight.bold, fontSize: 13))
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeaturePill(IconData icon, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.cyan.shade100)),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF0096C7), size: 12),
-          const SizedBox(width: 4),
-          Text(text, style: const TextStyle(color: Color(0xFF0096C7), fontSize: 11, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-}
-
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
-  @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
-  bool _isLoading = false;
-
-  void _login() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
-      return;
-    }
-    setState(() => _isLoading = true);
-    final user = await _authService.signInWithEmail(_emailController.text.trim(), _passwordController.text.trim());
-    setState(() => _isLoading = false);
-    
-    if (user != null) {
-      if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()));
-    } else {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login failed. Check credentials.')));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0FBFF),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Top Bar
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                      child: const Icon(Icons.arrow_back_ios_new, size: 16),
-                    ),
-                    const LanguageSelector(bgColor: Colors.white, textColor: Colors.black)
-                  ],
-                ),
-                
-                const SizedBox(height: 30),
-                
-                // Logo
-                Image.asset('assets/images/logo_icon.png', height: 80),
-                const SizedBox(height: 10),
-                
-                // Welcome Text
-                const Text('Welcome Back', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text('Sign in to continue exploring top fashion & deals', style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 13)),
-                
-                const SizedBox(height: 40),
-                
-                // Form
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Email or Phone Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
-                      child: TextField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'name@domain.com or phone',
-                          hintStyle: TextStyle(color: Colors.black38),
-                          prefixIcon: Icon(Icons.alternate_email, color: Colors.black38, size: 20),
-                          prefixIconConstraints: BoxConstraints(minWidth: 40),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    
-                    const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
-                      child: TextField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: '????????????',
-                          hintStyle: TextStyle(color: Colors.black38, letterSpacing: 2),
-                          prefixIcon: Icon(Icons.lock_outline, color: Colors.black38, size: 20),
-                          prefixIconConstraints: BoxConstraints(minWidth: 40),
-                          suffixIcon: Icon(Icons.visibility_off_outlined, color: Colors.black38, size: 20),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Remember Me & Forgot Password
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(width: 20, height: 20, decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(4)), child: const Icon(Icons.check, color: Colors.white, size: 14)),
-                        const SizedBox(width: 10),
-                        const Text('Remember me', style: TextStyle(color: Colors.black87, fontSize: 13)),
-                      ],
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
-                      child: const Text('Forgot Password?', style: TextStyle(color: Color(0xFF00BCD4), fontWeight: FontWeight.bold, fontSize: 13))
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 30),
-                
-                // Login Button
-                SizedBox(
-                  width: double.infinity, height: 55,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _login,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF008CBA), // darker cyan/blue
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 5,
-                      shadowColor: const Color(0xFF00BCD4).withOpacity(0.3)
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Log In', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 30),
-                
-                // OR Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Text('OR\nCONTINUE\nWITH', textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey.shade300, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                    ),
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
-                  ],
-                ),
-                
-                const SizedBox(height: 30),
-                
-                // Social Logins
-                Row(
-                  children: [
-                    Expanded(child: Container(height: 55, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)), child: const Icon(Icons.g_mobiledata, color: Colors.red, size: 40))),
-                  ],
-                ),
-                
-                const SizedBox(height: 40),
-                
-                // Sign up link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Don't have an account? ", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-                    GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpScreen())),
-                      child: const Text('Sign up', style: TextStyle(color: Color(0xFF00BCD4), fontWeight: FontWeight.bold, fontSize: 13))
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.lock, color: Colors.green, size: 12),
-                    const SizedBox(width: 4),
-                    Text('256-bit Secure Encryption ï¿½ Protected by Cescrafli', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
-                  ],
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SignUpScreen extends ConsumerStatefulWidget {
-  const SignUpScreen({super.key});
-  @override
-  ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
-}
-
-class _SignUpScreenState extends ConsumerState<SignUpScreen> {
-  final AuthService _authService = AuthService();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  bool _isLoading = false;
-  bool _agreedToTerms = false;
-  String _selectedCountryCode = '+62'; // Default Indonesia
-  bool _obscurePassword = true;
-
-  void _signUp() async {
-    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty || _phoneController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
-      return;
-    }
-    if (!_agreedToTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You must agree to the Terms of Service')));
-      return;
-    }
-    
-    // Basic email validation
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(_emailController.text.trim())) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid email address')));
-      return;
-    }
-    
-    setState(() => _isLoading = true);
-    final user = await _authService.signUpWithEmail(_emailController.text.trim(), _passwordController.text.trim());
-    if (mounted) {
-      setState(() => _isLoading = false);
-      if (user != null) {
-        // user created successfully
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign Up Failed. Check your email format or try again.')));
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Top Bar
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: const BoxDecoration(color: Color(0xFFE8EAF6), shape: BoxShape.circle),
-                        child: const Icon(Icons.arrow_back_ios_new, size: 16),
-                      ),
-                    ),
-                    const LanguageSelector(bgColor: Color(0xFFE8EAF6), textColor: Colors.black, showLanguageIcon: true)
-                  ],
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Logo
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)]),
-                  child: Image.asset('assets/images/logo_icon.png', height: 40),
-                ),
-                const SizedBox(height: 20),
-                
-                // Welcome Text
-                const Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF111827))),
-                const SizedBox(height: 8),
-                Text('Join Cescrafli to unlock exclusive deals and\npersonalized fashion.', textAlign: TextAlign.center, style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 13, height: 1.4)),
-                
-                const SizedBox(height: 30),
-                
-                // Form
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Full Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
-                      child: TextField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'e.g. Cesc Fabregas',
-                          hintStyle: TextStyle(color: Colors.black26),
-                          prefixIcon: Icon(Icons.person_outline, color: Colors.black54, size: 20),
-                          prefixIconConstraints: BoxConstraints(minWidth: 40),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 15),
-                    
-                    const Text('Email Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
-                      child: TextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'name@domain.com',
-                          hintStyle: TextStyle(color: Colors.black26),
-                          prefixIcon: Icon(Icons.email_outlined, color: Colors.black54, size: 20),
-                          prefixIconConstraints: BoxConstraints(minWidth: 40),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 15),
-                    
-                    const Text('Phone Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: const BoxDecoration(color: Color(0xFFF0F5FF), borderRadius: BorderRadius.only(topLeft: Radius.circular(16), bottomLeft: Radius.circular(16))),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: _selectedCountryCode,
-                                isExpanded: true,
-                                icon: const Icon(Icons.arrow_drop_down, size: 16),
-                                items: ['+1', '+62', '+44', '+91'].map((code) => DropdownMenuItem(value: code, child: Text(code, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)))).toList(),
-                                onChanged: (val) => setState(() => _selectedCountryCode = val!),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(width: 1, height: 25, color: Colors.grey.shade300),
-                        Expanded(
-                          flex: 7,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            decoration: const BoxDecoration(color: Color(0xFFF0F5FF), borderRadius: BorderRadius.only(topRight: Radius.circular(16), bottomRight: Radius.circular(16))),
-                            child: TextField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                hintText: '(555) 000-0000',
-                                hintStyle: TextStyle(color: Colors.black26),
-                                prefixIcon: Icon(Icons.phone_outlined, color: Colors.black54, size: 18),
-                                prefixIconConstraints: BoxConstraints(minWidth: 30),
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 15),
-                    
-                    const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      decoration: BoxDecoration(color: const Color(0xFFF0F5FF), borderRadius: BorderRadius.circular(16)),
-                      child: TextField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Create strong password',
-                          hintStyle: const TextStyle(color: Colors.black26),
-                          prefixIcon: const Icon(Icons.lock_outline, color: Colors.black54, size: 20),
-                          prefixIconConstraints: const BoxConstraints(minWidth: 40),
-                          suffixIcon: IconButton(
-                            icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: Colors.black54, size: 20),
-                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword)
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 25),
-                
-                // Terms
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 24, height: 24,
-                      child: Checkbox(
-                        value: _agreedToTerms,
-                        onChanged: (val) => setState(() => _agreedToTerms = val ?? false),
-                        activeColor: const Color(0xFF006C7A),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Terms & Privacy Policy'),
-                              content: const SingleChildScrollView(
-                                child: Text('Cescrafli Terms of Service & Privacy Policy\n\n1. Acceptance of Terms\nBy accessing and using this application, you agree to be bound by these Terms of Service.\n\n2. Privacy Policy\nYour privacy is important to us. We will not share your personal data without your consent.\n\n3. User Conduct\nYou agree to use the application responsibly and not for any unlawful purposes.'),
-                              ),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))
-                              ],
-                            ),
-                          );
-                        },
-                        child: Text.rich(
-                          TextSpan(
-                            text: 'By creating an account, you agree to Cescrafli ',
-                            style: const TextStyle(color: Colors.black54, fontSize: 13, height: 1.4),
-                            children: [
-                              TextSpan(text: 'Terms of Service ', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
-                              const TextSpan(text: 'and '),
-                              TextSpan(text: 'Privacy Policy', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
-                            ]
-                          )
-                        ),
-                      )
-                    )
-                  ],
-                ),
-                
-                const SizedBox(height: 30),
-                
-                // Sign Up Button
-                SizedBox(
-                  width: double.infinity, height: 55,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _signUp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF26C6DA),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 5,
-                      shadowColor: const Color(0xFF00BCD4).withOpacity(0.3)
-                    ),
-                    child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Create Account', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 25),
-                
-                // Log in link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Already have an account? ", style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
-                    GestureDetector(
-                      onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-                      child: const Text('Log In', style: TextStyle(color: Color(0xFF006C7A), fontWeight: FontWeight.bold, fontSize: 14))
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
-  @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
-}
-
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final _emailController = TextEditingController();
-  bool _isLoading = false;
-
-  void _sendResetCode() {
-    if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter your email address')));
-      return;
-    }
-    setState(() => _isLoading = true);
-    
-    // Simulate network request
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reset link sent to your email!')));
-        Navigator.pop(context);
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF0FBFF),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Top Bar
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                      child: GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: const Icon(Icons.arrow_back_ios_new, size: 16)
-                      ),
-                    ),
-                    const LanguageSelector(bgColor: Colors.white, textColor: Colors.black)
-                  ],
-                ),
-                
-                const SizedBox(height: 40),
-                
-                // Logo & Header
-                Image.asset('assets/images/logo_icon.png', height: 70),
-                const SizedBox(height: 30),
-                
-                const Text('Reset Password', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF03045E), letterSpacing: -0.5)),
-                const SizedBox(height: 12),
-                const Text('Enter your email address and we will send you a link to reset your password.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontSize: 15, height: 1.5)),
-                
-                const SizedBox(height: 40),
-                
-                // Input Form
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Email Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
-                      child: TextField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'name@domain.com',
-                          hintStyle: TextStyle(color: Colors.black38),
-                          prefixIcon: Icon(Icons.alternate_email, color: Colors.black38, size: 20),
-                          prefixIconConstraints: BoxConstraints(minWidth: 40),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 40),
-                
-                // Send Button
-                SizedBox(
-                  width: double.infinity, height: 55,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _sendResetCode,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00B4D8), // Cyan
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 5,
-                      shadowColor: const Color(0xFF00BCD4).withOpacity(0.3)
-                    ),
-                    child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Send Reset Link', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 30),
-                
-                // Back to Login
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Remember your password? ", style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Text('Log In', style: TextStyle(color: Color(0xFF00BCD4), fontWeight: FontWeight.bold, fontSize: 14))
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -1219,142 +109,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 }
 
-class PromoCarousel extends StatefulWidget {
-  const PromoCarousel({super.key});
-  @override
-  State<PromoCarousel> createState() => _PromoCarouselState();
-}
-
-class _PromoCarouselState extends State<PromoCarousel> {
-  late PageController _pageController;
-  Timer? _timer;
-  int _currentPage = 0;
-
-  final List<Map<String, String>> promos = [
-    {
-      'tag': 'SUMMER 2024',
-      'title': 'Eco-Collection\nMountain Series',
-      'subtitle': 'Up to 40% OFF this week',
-      'image': 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      'tag': 'NEW ARRIVAL',
-      'title': 'Urban Street\nFashion 2.0',
-      'subtitle': 'Exclusive for members',
-      'image': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      'tag': 'LIMITED EDITION',
-      'title': 'Winter Coat\nPremium Collection',
-      'subtitle': 'Buy 1 Get 1 Free',
-      'image': 'https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-    }
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: 0);
-    _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
-      if (_currentPage < promos.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
-      if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      child: SizedBox(
-        height: 180,
-        child: PageView.builder(
-          controller: _pageController,
-          onPageChanged: (int page) {
-            setState(() {
-              _currentPage = page;
-            });
-          },
-          itemCount: promos.length,
-          itemBuilder: (context, index) {
-            final promo = promos[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailScreen(title: promo['title']!.replaceAll('\n', ' '), price: 'Promo', imageUrl: promo['image']!)));
-              },
-              child: Container(
-                margin: const EdgeInsets.only(right: 8),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  image: DecorationImage(image: NetworkImage(promo['image']!), fit: BoxFit.cover),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 5))],
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent], begin: Alignment.centerLeft, end: Alignment.centerRight)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(20)), child: Text(promo['tag']!, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
-                      const SizedBox(height: 12),
-                      Text(promo['title']!, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, height: 1.2)),
-                      const SizedBox(height: 8),
-                      Text(promo['subtitle']!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                      const Spacer(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                            child: const Row(children: [Text('Shop Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), SizedBox(width: 4), Icon(Icons.arrow_forward, size: 14)]),
-                          ),
-                          Row(
-                            children: List.generate(promos.length, (dotIndex) {
-                              return Container(
-                                margin: const EdgeInsets.only(left: 4),
-                                width: _currentPage == dotIndex ? 16 : 4,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: _currentPage == dotIndex ? Theme.of(context).primaryColor : Colors.white54,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              );
-                            }),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -1398,16 +152,11 @@ class HomeScreen extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You have no new notifications'), duration: Duration(seconds: 1)));
-                          },
-                          child: Stack(
-                            children: [
-                              Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle), child: const Icon(Icons.notifications_none, size: 22, color: Colors.black87)),
-                              Positioned(top: 10, right: 10, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle))),
-                            ],
-                          ),
+                        Stack(
+                          children: [
+                            Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle), child: const Icon(Icons.notifications_none, size: 22, color: Colors.black87)),
+                            Positioned(top: 10, right: 10, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle))),
+                          ],
                         ),
                         const SizedBox(width: 12),
                         GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())), child: const CircleAvatar(radius: 22, backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'))),
@@ -1446,7 +195,53 @@ class HomeScreen extends StatelessWidget {
               ),
 
               // 3. Promo Banner
-              const PromoCarousel(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    image: const DecorationImage(image: NetworkImage('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'), fit: BoxFit.cover),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(colors: [Colors.black.withOpacity(0.7), Colors.transparent], begin: Alignment.centerLeft, end: Alignment.centerRight)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(20)), child: const Text('SUMMER 2024', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
+                        const SizedBox(height: 12),
+                        const Text('Eco-Collection\nMountain Series', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, height: 1.2)),
+                        const SizedBox(height: 8),
+                        const Text('Up to 40% OFF this week', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                              child: const Row(children: [Text('Shop Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), SizedBox(width: 4), Icon(Icons.arrow_forward, size: 14)]),
+                            ),
+                            Row(
+                              children: [
+                                Container(width: 16, height: 4, decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(2))),
+                                const SizedBox(width: 4),
+                                Container(width: 4, height: 4, decoration: BoxDecoration(color: Colors.white54, shape: BoxShape.circle)),
+                                const SizedBox(width: 4),
+                                Container(width: 4, height: 4, decoration: BoxDecoration(color: Colors.white54, shape: BoxShape.circle)),
+                              ],
+                            )
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
               // 4. Categories (KEEPING EXISTING LOGOS)
               Padding(
@@ -1709,7 +504,7 @@ class CartScreen extends StatelessWidget {
                     Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: Colors.orange.shade100, borderRadius: BorderRadius.circular(10)), child: Text('Hot', style: TextStyle(color: Colors.orange.shade800, fontSize: 10, fontWeight: FontWeight.bold))),
                   ],
                 ),
-                GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoryListScreen())), child: Text('See All', style: TextStyle(fontSize: 14, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)))
+                GestureDetector(onTap: () {}, child: Text('See All', style: TextStyle(fontSize: 14, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)))
               ],
             ),
           ),
@@ -1864,7 +659,7 @@ class PersonalInfoScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     _buildTextField('Email Address', 'cesc.fabregas@clubmail.com', Icons.mail_outline, rightLabel: _buildVerifiedBadge()),
                     const SizedBox(height: 20),
-                    _buildTextField('Phone Number', '(555) 382-9014', Icons.phone_outlined, rightLabel: _buildVerifiedBadge(), prefix: Row(children: [Text('Ã°Å¸â€¡ÂºÃ°Å¸â€¡Â¸ +1', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)), const SizedBox(width: 8), Container(height: 20, width: 1, color: Colors.grey.shade300)])),
+                    _buildTextField('Phone Number', '(555) 382-9014', Icons.phone_outlined, rightLabel: _buildVerifiedBadge(), prefix: Row(children: [Text('ðŸ‡ºðŸ‡¸ +1', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)), const SizedBox(width: 8), Container(height: 20, width: 1, color: Colors.grey.shade300)])),
                     const SizedBox(height: 20),
                     Row(
                       children: [
@@ -1933,7 +728,7 @@ class PersonalInfoScreen extends StatelessWidget {
                       children: [
                         Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.grey.shade50, shape: BoxShape.circle), child: Icon(Icons.lock_outline, color: Colors.grey.shade600, size: 20)),
                         const SizedBox(width: 15),
-                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)), const SizedBox(height: 2), Text('Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢', style: TextStyle(color: Colors.grey.shade400, fontSize: 16))])),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)), const SizedBox(height: 2), Text('â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢', style: TextStyle(color: Colors.grey.shade400, fontSize: 16))])),
                         Text('Change', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 13, fontWeight: FontWeight.bold))
                       ],
                     ),
@@ -2041,18 +836,9 @@ class ProductCard extends StatelessWidget {
                   // Favorite Button
                   Positioned(
                     top: 10, right: 10, 
-                    child: ValueListenableBuilder<List<Map<String, dynamic>>>(
-                      valueListenable: globalWishlist,
-                      builder: (context, wishlist, child) {
-                        final isFavorite = wishlist.any((item) => item['title'] == title);
-                        return GestureDetector(
-                          onTap: () => toggleWishlist(title, subtitle, price, imageUrl, context),
-                          child: Container(
-                            padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), shape: BoxShape.circle), 
-                            child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border, size: 16, color: isFavorite ? Colors.red : Colors.grey)
-                          )
-                        );
-                      }
+                    child: Container(
+                      padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), shape: BoxShape.circle), 
+                      child: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 16, color: isFav ? Colors.red : Colors.grey)
                     )
                   ),
                   // Tags
@@ -2195,9 +981,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                     Row(
                       children: [
-                        CircleAvatar(backgroundColor: Colors.black45, child: IconButton(icon: const Icon(Icons.favorite_border, color: Colors.white, size: 20), onPressed: () { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to Wishlist!'))); })),
+                        CircleAvatar(backgroundColor: Colors.black45, child: IconButton(icon: const Icon(Icons.favorite_border, color: Colors.white, size: 20), onPressed: () {})),
                         const SizedBox(width: 10),
-                        CircleAvatar(backgroundColor: Colors.black45, child: IconButton(icon: const Icon(Icons.share, color: Colors.white, size: 20), onPressed: () { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link copied to clipboard!'))); })),
+                        CircleAvatar(backgroundColor: Colors.black45, child: IconButton(icon: const Icon(Icons.share, color: Colors.white, size: 20), onPressed: () {})),
                       ],
                     ),
                   ],
@@ -2244,7 +1030,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     children: [
                       Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(border: Border.all(color: Colors.green), borderRadius: BorderRadius.circular(4)), child: const Text('In Stock', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold))),
                       const SizedBox(width: 10),
-                      Text('Ã¢â‚¬Â¢ Mountain Series', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                      Text('â€¢ Mountain Series', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                     ],
                   ),
                   const SizedBox(height: 15),
@@ -2540,7 +1326,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       children: [
                                         const Text('Home Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                                         const SizedBox(width: 6),
-                                        Text('Ã¢â‚¬Â¢ Primary', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
+                                        Text('â€¢ Primary', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
                                       ],
                                     ),
                                     const SizedBox(height: 6),
@@ -2670,7 +1456,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 4),
-                                Text('Expires 08/27 Ã¢â‚¬Â¢ Debit Card', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                                Text('Expires 08/27 â€¢ Debit Card', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
                               ],
                             ),
                           ),
@@ -2720,8 +1506,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ],
                     ),
                     const SizedBox(height: 15),
-                    _buildOrderItemCard(Icons.checkroom, 'Denim Classic Jacket', 'Size: L Ã¢â‚¬Â¢ Indigo Blue Ã¢â‚¬Â¢ Qty: 1', '\$30.00'),
-                    _buildOrderItemCard(Icons.eco, 'Basic Eco-Cotton T-Shirt', 'Size: M Ã¢â‚¬Â¢ Sand Linen Ã¢â‚¬Â¢ Qty: 1', '\$15.00', iconColor: Colors.green),
+                    _buildOrderItemCard(Icons.checkroom, 'Denim Classic Jacket', 'Size: L â€¢ Indigo Blue â€¢ Qty: 1', '\$30.00'),
+                    _buildOrderItemCard(Icons.eco, 'Basic Eco-Cotton T-Shirt', 'Size: M â€¢ Sand Linen â€¢ Qty: 1', '\$15.00', iconColor: Colors.green),
                     const SizedBox(height: 25),
 
                     // 7. Summary
@@ -2957,7 +1743,7 @@ class _AddressScreenState extends State<AddressScreen> {
                       subtitle1: 'Primary residence',
                       nameAndPhone: 'Cesc Fabregas  |  (+1 858-555-0192)',
                       addressText: '123 Main Street, Apt 4B, San Diego, CA 92101',
-                      extraWidget: Container(margin: const EdgeInsets.only(top: 8), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade100)), child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.check_circle, color: Colors.green, size: 12), SizedBox(width: 4), Text('Fast Transit Ã¢â‚¬Â¢ Door concierge delivery', style: TextStyle(color: Colors.green, fontSize: 11))])),
+                      extraWidget: Container(margin: const EdgeInsets.only(top: 8), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade100)), child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.check_circle, color: Colors.green, size: 12), SizedBox(width: 4), Text('Fast Transit â€¢ Door concierge delivery', style: TextStyle(color: Colors.green, fontSize: 11))])),
                     ),
                     const SizedBox(height: 15),
 
@@ -3241,7 +2027,7 @@ class _EditBagScreenState extends State<EditBagScreen> {
                     children: [
                       const Text('Edit Bag', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 2),
-                      Text('2 ITEMS SELECTED Ã¢â‚¬Â¢ ORDER #ORD-9302', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      Text('2 ITEMS SELECTED â€¢ ORDER #ORD-9302', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     ],
                   ),
                   Container(
@@ -3310,8 +2096,8 @@ class _EditBagScreenState extends State<EditBagScreen> {
                       icon: Icons.checkroom, iconColor: Colors.blueGrey.shade800,
                       badgeText: 'Eco',
                       title: 'Denim Classic Jacket',
-                      desc: 'Classic Fit Ã¢â‚¬Â¢ Heavyweight 14oz Cotton',
-                      statusColor: Colors.green, statusText: 'In Stock Ã¢â‚¬Â¢ Ships Tomorrow 14:00',
+                      desc: 'Classic Fit â€¢ Heavyweight 14oz Cotton',
+                      statusColor: Colors.green, statusText: 'In Stock â€¢ Ships Tomorrow 14:00',
                       price: '\$30.00',
                       sizeList: ['S', 'M', 'L', 'XL'],
                       selectedSize: size1,
@@ -3817,7 +2603,7 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
                           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
-                          child: const Row(children: [Text('Ã°Å¸â€¡ÂºÃ°Å¸â€¡Â¸ +1', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), SizedBox(width: 8), Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: 18)]),
+                          child: const Row(children: [Text('ðŸ‡ºðŸ‡¸ +1', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), SizedBox(width: 8), Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: 18)]),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -4231,7 +3017,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
                           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
-                          child: const Row(children: [Text('Ã°Å¸â€¡ÂºÃ°Å¸â€¡Â¸ +1', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), SizedBox(width: 8), Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: 18)]),
+                          child: const Row(children: [Text('ðŸ‡ºðŸ‡¸ +1', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), SizedBox(width: 8), Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: 18)]),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -4568,7 +3354,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     const SizedBox(height: 15),
                     _buildActiveVisaCard(),
                     const SizedBox(height: 12),
-                    _buildInactiveCard(1, 'Mastercard ending in 8831', 'Expires 11/26 Ã¢â‚¬Â¢ Credit Card', Icons.circle, Colors.orange, 'Set Default'),
+                    _buildInactiveCard(1, 'Mastercard ending in 8831', 'Expires 11/26 â€¢ Credit Card', Icons.circle, Colors.orange, 'Set Default'),
                     const SizedBox(height: 15),
                     
                     // Add New Card Button
@@ -4736,7 +3522,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text('Expires 08/27 Ã¢â‚¬Â¢ Debit Card', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                      Text('Expires 08/27 â€¢ Debit Card', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
                       const SizedBox(height: 4),
                       Text('Cesc Fabregas', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
                     ],
@@ -4760,7 +3546,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   Row(
                     children: [
-                      Container(padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)), child: const Text('Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢', style: TextStyle(fontSize: 14, letterSpacing: 2, color: Colors.black))),
+                      Container(padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)), child: const Text('â€¢â€¢â€¢', style: TextStyle(fontSize: 14, letterSpacing: 2, color: Colors.black))),
                       const SizedBox(width: 10),
                       const Text('Verified', style: TextStyle(color: Color(0xFF0F8A9E), fontWeight: FontWeight.bold, fontSize: 12)),
                     ],
@@ -4956,7 +3742,7 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
                             children: [
                               Text('CARD NUMBER', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
                               const SizedBox(height: 4),
-                              const Text('4242   Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢   Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢   8821', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                              const Text('4242   â€¢â€¢â€¢â€¢   â€¢â€¢â€¢â€¢   8821', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
                             ],
                           ),
                           Row(
@@ -5040,7 +3826,7 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 15),
                                       decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
-                                      child: const TextField(obscureText: true, decoration: InputDecoration(border: InputBorder.none, hintText: 'Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢', prefixIcon: Icon(Icons.lock_outline, size: 18, color: Colors.grey), prefixIconConstraints: BoxConstraints(minWidth: 30)), style: TextStyle(fontSize: 14, letterSpacing: 2)),
+                                      child: const TextField(obscureText: true, decoration: InputDecoration(border: InputBorder.none, hintText: 'â€¢â€¢â€¢', prefixIcon: Icon(Icons.lock_outline, size: 18, color: Colors.grey), prefixIconConstraints: BoxConstraints(minWidth: 30)), style: TextStyle(fontSize: 14, letterSpacing: 2)),
                                     ),
                                   ],
                                 ),
@@ -5161,7 +3947,7 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('256-bit Bank-grade Encryption Ã¢â‚¬Â¢ PCI-DSS Compliant', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                      const Text('256-bit Bank-grade Encryption â€¢ PCI-DSS Compliant', style: TextStyle(color: Colors.grey, fontSize: 10)),
                     ],
                   )
                 ],
@@ -5297,7 +4083,7 @@ class ApplePayScreen extends StatelessWidget {
                                     children: [
                                       const Text('Apple Card', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                                       const SizedBox(height: 2),
-                                      Text('Mastercard Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢ 9924', style: TextStyle(color: Colors.blueGrey.shade200, fontSize: 12)),
+                                      Text('Mastercard â€¢â€¢â€¢â€¢ 9924', style: TextStyle(color: Colors.blueGrey.shade200, fontSize: 12)),
                                     ],
                                   ),
                                 ),
@@ -5321,7 +4107,7 @@ class ApplePayScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text('Ã¢â€ Â Choose a different payment method', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 13)),
+                    Text('â† Choose a different payment method', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 13)),
                     const SizedBox(height: 30),
                   ],
                 ),
@@ -5345,7 +4131,7 @@ class ApplePayScreen extends StatelessWidget {
                           Icon(Icons.apple, color: Colors.white, size: 20),
                           Text('Pay', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                           SizedBox(width: 15),
-                          Text('Ã¢â‚¬Â¢', style: TextStyle(color: Colors.blueGrey)),
+                          Text('â€¢', style: TextStyle(color: Colors.blueGrey)),
                           SizedBox(width: 15),
                           Text('\$40.50', style: TextStyle(color: Color(0xFF00BCD4), fontSize: 16, fontWeight: FontWeight.bold)),
                         ],
@@ -5417,7 +4203,7 @@ class PayPalScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 2),
-                      Text('CONNECTED ACCOUNT Ã¢â‚¬Â¢ #ORD-9302', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      Text('CONNECTED ACCOUNT â€¢ #ORD-9302', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     ],
                   ),
                   Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), child: const Icon(Icons.lock, color: Color(0xFF0F8A9E), size: 18)),
@@ -5484,7 +4270,7 @@ class PayPalScreen extends StatelessWidget {
                               children: [
                                 Row(children: const [Text('E-Commerce Store', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)), SizedBox(width: 6), Icon(Icons.verified, color: Colors.blue, size: 14)]),
                                 const SizedBox(height: 4),
-                                Text('Order #ORD-9302 Ã¢â‚¬Â¢ 2 items', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                                Text('Order #ORD-9302 â€¢ 2 items', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
                               ],
                             ),
                           ),
@@ -5509,7 +4295,7 @@ class PayPalScreen extends StatelessWidget {
                     const SizedBox(height: 15),
                     _buildPPOption(true, 'PayPal Balance', '\$142.80 available', Icons.account_balance_wallet, Colors.blue, 'Preferred', Colors.blue.shade50, Colors.blue),
                     const SizedBox(height: 12),
-                    _buildPPOption(false, 'Chase Checking', 'Primary Bank Account', Icons.account_balance, Colors.grey.shade700, 'Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢ 5120', Colors.transparent, Colors.grey),
+                    _buildPPOption(false, 'Chase Checking', 'Primary Bank Account', Icons.account_balance, Colors.grey.shade700, 'â€¢â€¢â€¢â€¢ 5120', Colors.transparent, Colors.grey),
                     const SizedBox(height: 12),
                     _buildPPOption(false, 'Pay in 4 Interest-Free', '4 payments of \$10.12 every 2 weeks', Icons.money, Colors.orange, '0% APR', Colors.green.shade50, Colors.green),
                     const SizedBox(height: 20),
@@ -5540,7 +4326,7 @@ class PayPalScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Billing Currency', style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
-                        const Text('Ã°Å¸Å’Â USD (\$40.50) Ã¢â‚¬Â¢ No conversion fee', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        const Text('ðŸŒ USD (\$40.50) â€¢ No conversion fee', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 30),
@@ -5558,7 +4344,7 @@ class PayPalScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00BCD4), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                      child: const Text('Agree & Pay \$40.50 with PayPal  Ã¢â€ â€™', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text('Agree & Pay \$40.50 with PayPal  â†’', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -5771,7 +4557,7 @@ class CODScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00BCD4), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                      child: const Text('Confirm Order via COD Ã¢â‚¬Â¢ \$40.50  Ã¢â€ â€™', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text('Confirm Order via COD â€¢ \$40.50  â†’', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -5995,102 +4781,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
   }
 }
 class CategoryProductsScreen extends StatelessWidget { final String categoryName; const CategoryProductsScreen({super.key, required this.categoryName}); @override Widget build(BuildContext context) { return Scaffold(appBar: AppBar(title: Text(categoryName, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), backgroundColor: Colors.white, elevation: 0, iconTheme: const IconThemeData(color: Colors.black)), body: GridView.builder(padding: const EdgeInsets.all(20), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 0.58), itemCount: 6, itemBuilder: (context, index) { return ProductCard(title: '$categoryName Item ${index + 1}', subtitle: 'Best Quality', price: '\$${(index+1)*12}.00', imageUrl: 'https://picsum.photos/seed/${index + 300}/300/400', rating: '4.${index%9}', reviews: '${index*12+5}', isFav: index%2==0); })); } }
-class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
-  @override
-  State<SearchScreen> createState() => _SearchScreenState();
-}
-
-class _SearchScreenState extends State<SearchScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  List<String> recentSearches = ['T-Shirt Mens', 'Sneakers White', 'Jacket Denim'];
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-        title: Container(
-          height: 44,
-          decoration: BoxDecoration(color: const Color(0xFFF7F8FA), borderRadius: BorderRadius.circular(22)),
-          child: TextField(
-            controller: _searchController,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: 'Search products...',
-              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
-              suffixIcon: IconButton(icon: const Icon(Icons.close, color: Colors.grey, size: 18), onPressed: () => _searchController.clear()),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12)
-            )
-          )
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Recent Searches
-              if (recentSearches.isNotEmpty) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Recent Searches', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    TextButton(onPressed: () => setState(() => recentSearches.clear()), child: const Text('Clear All', style: TextStyle(color: Color(0xFF00BCD4))))
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: recentSearches.map((search) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(color: const Color(0xFFF0FBFF), borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFE0F4F8))),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.history, size: 14, color: Color(0xFF00BCD4)),
-                        const SizedBox(width: 6),
-                        Text(search, style: const TextStyle(color: Color(0xFF006C7A), fontSize: 13, fontWeight: FontWeight.w500)),
-                      ],
-                    ),
-                  )).toList(),
-                ),
-                const SizedBox(height: 30),
-              ],
-              
-              // Trending
-              const Text('Trending Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 15),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: ['Smart Watches', 'Summer Collection', 'Running Shoes', 'Wireless Earbuds'].map((trend) => GestureDetector(
-                  onTap: () {
-                    _searchController.text = trend;
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade300)),
-                    child: Text(trend, style: const TextStyle(color: Colors.black87, fontSize: 13)),
-                  ),
-                )).toList(),
-              ),
-            ]
-          )
-        )
-      )
-    );
-  }
-}
-
-
+class SearchScreen extends StatelessWidget { const SearchScreen({super.key}); @override Widget build(BuildContext context) { return Scaffold(appBar: AppBar(backgroundColor: Colors.white, elevation: 0, iconTheme: const IconThemeData(color: Colors.black), title: Container(height: 40, decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(10)), child: const TextField(autofocus: true, decoration: InputDecoration(hintText: 'Search...', prefixIcon: Icon(Icons.search, color: Colors.grey), border: InputBorder.none)))), body: Padding(padding: const EdgeInsets.all(20.0), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Recent Searches', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), const SizedBox(height: 15), ListTile(leading: const Icon(Icons.history), title: const Text('T-Shirt Mens'), trailing: const Icon(Icons.close, size: 16), onTap: (){})]))); } }
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
 
@@ -6099,107 +4790,76 @@ class FavoriteScreen extends StatefulWidget {
 }
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
-  String _selectedCategory = 'All';
-
-  String _getCategory(String title) {
-    title = title.toLowerCase();
-    if (title.contains('jacket') || title.contains('coat') || title.contains('hoodie')) return 'Outerwear';
-    if (title.contains('pant') || title.contains('jeans') || title.contains('short')) return 'Pants';
-    if (title.contains('shirt') || title.contains('tee')) return 'Apparel';
-    if (title.contains('shoe') || title.contains('sneaker')) return 'Shoes';
-    return 'Other';
-  }
+  int _selectedChipIndex = 0;
+  final chips = ['All (4)', 'Apparel (2)', 'Outerwear (1)', 'Pants (1)'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
-        child: ValueListenableBuilder<List<Map<String, dynamic>>>(
-          valueListenable: globalWishlist,
-          builder: (context, wishlist, _) {
-            // Count categories
-            Map<String, int> catCounts = {'All': wishlist.length};
-            for (var item in wishlist) {
-              String cat = _getCategory(item['title'] ?? '');
-              catCounts[cat] = (catCounts[cat] ?? 0) + 1;
-            }
-            
-            // Build chips list
-            List<String> activeCats = ['All'];
-            for (var c in ['Apparel', 'Outerwear', 'Pants', 'Shoes', 'Other']) {
-              if ((catCounts[c] ?? 0) > 0) activeCats.add(c);
-            }
-
-            // Filter items
-            List<Map<String, dynamic>> filteredItems = _selectedCategory == 'All' 
-                ? wishlist 
-                : wishlist.where((i) => _getCategory(i['title'] ?? '') == _selectedCategory).toList();
-
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 1. Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () { if (Navigator.canPop(context)) Navigator.pop(context); },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                        child: const Icon(Icons.arrow_back_ios_new, size: 18),
+                      ),
+                    ),
+                    Column(
                       children: [
-                        GestureDetector(
-                          onTap: () { if (Navigator.canPop(context)) Navigator.pop(context); },
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
-                            child: const Icon(Icons.arrow_back_ios_new, size: 18),
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            const Text('Favorites', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Text('${wishlist.length} saved items' , style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
-                          child: const Icon(Icons.more_horiz, size: 20),
-                        ),
+                        const Text('Favorites', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text('4 saved items', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
                       ],
                     ),
-                  ),
-
-                  // 2. Chips
-                  const SizedBox(height: 10),
-                  if (wishlist.isNotEmpty) SizedBox(
-                    height: 35,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: activeCats.length,
-                      itemBuilder: (context, index) {
-                        String cat = activeCats[index];
-                        String label = '${cat} (${catCounts[cat]})';
-                        bool isSelected = _selectedCategory == cat;
-                        return GestureDetector(
-                          onTap: () => setState(() => _selectedCategory = cat),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 10),
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.black54, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 12)),
-                          ),
-                        );
-                      },
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                      child: const Icon(Icons.more_horiz, size: 20),
                     ),
-                  ),
-                  
-                  // 3. Sub-header
+                  ],
+                ),
+              ),
+
+              // 2. Chips
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 35,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: chips.length,
+                  itemBuilder: (context, index) {
+                    bool isSelected = _selectedChipIndex == index;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedChipIndex = index),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(chips[index], style: TextStyle(color: isSelected ? Colors.white : Colors.black54, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 12)),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              
+              // 3. Sub-header
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Row(
@@ -6224,44 +4884,22 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
               ),
 
               // 4. Grid View
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: filteredItems.isEmpty 
-                      ? const Padding(
-                          padding: EdgeInsets.only(top: 50),
-                          child: Center(
-                            child: Column(
-                              children: [
-                                Icon(Icons.favorite_border, size: 60, color: Colors.black26),
-                                SizedBox(height: 16),
-                                Text('Your wishlist is empty', style: TextStyle(fontSize: 16, color: Colors.black54)),
-                              ]
-                            )
-                          )
-                        )
-                      : GridView.builder(
-                          shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 0.58
-                          ),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            final item = filteredItems[index];
-                            return ProductCard(
-                              title: item['title'] ?? '', 
-                              subtitle: item['subtitle'] ?? '', 
-                              price: item['price'] ?? '', 
-                              imageUrl: item['image'] ?? '', 
-                              rating: '4.5', reviews: '0', isFav: true
-                            );
-                          }
-                        ),
-                  ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GridView.count(
+                  crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+                  crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 0.58,
+                  children: [
+                    ProductCard(title: 'Basic Eco-Cotton T-Shirt', subtitle: '100% Organic Cotton', price: '\$15.00', oldPrice: '\$22.00', imageUrl: 'https://picsum.photos/seed/101/300/400', rating: '4.8', reviews: '124', tag1: '-30%', tag2: 'Eco', isFav: true),
+                    ProductCard(title: 'Denim Classic Jacket', subtitle: 'Cotton 100% Rigid', price: '\$30.00', oldPrice: '', imageUrl: 'https://picsum.photos/seed/102/300/400', rating: '4.9', reviews: '89', tag1: 'Bestseller', tag2: '', isFav: true),
+                    ProductCard(title: 'Cargo Utility Pants', subtitle: 'Relaxed Fit Canvas', price: '\$28.00', oldPrice: '', imageUrl: 'https://picsum.photos/seed/103/300/400', rating: '4.7', reviews: '52', tag1: 'Popular', tag2: '', isFav: true),
+                    ProductCard(title: 'Botanical Casual Shirt', subtitle: 'Lightweight Breathable', price: '\$18.00', oldPrice: '', imageUrl: 'https://picsum.photos/seed/104/300/400', rating: '4.6', reviews: '38', tag1: 'New', tag2: '', isFav: true),
+                  ],
+                ),
+              ),
               const SizedBox(height: 80),
             ],
           ),
-        );
-          }
         ),
       ),
     );
@@ -6534,7 +5172,7 @@ class NotificationsScreen extends StatelessWidget {
                     _buildNotifCard(
                       context: context,
                       iconBox: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.local_shipping_outlined, color: Color(0xFF00BCD4), size: 24)),
-                      title: 'Order Dispatched! Ã°Å¸Å¡Å¡',
+                      title: 'Order Dispatched! ðŸšš',
                       body: Text('Your package with Basic Eco-Cotton T-Shirt has been shipped via Express Courier.', style: TextStyle(color: Colors.grey.shade500, fontSize: 13, height: 1.4)),
                       actionButton: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6), decoration: BoxDecoration(color: const Color(0xFF00BCD4), borderRadius: BorderRadius.circular(20)), child: const Row(children: [Text('Track Order', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)), SizedBox(width: 4), Icon(Icons.arrow_forward_ios, color: Colors.white, size: 10)])),
                       time: '10m ago',
@@ -6545,7 +5183,7 @@ class NotificationsScreen extends StatelessWidget {
                     _buildNotifCard(
                       context: context,
                       iconBox: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.local_fire_department_outlined, color: Colors.orange, size: 24)),
-                      title: 'Flash Sale Alert: Up to 40% OFF Ã°Å¸â€Â¥',
+                      title: 'Flash Sale Alert: Up to 40% OFF ðŸ”¥',
                       body: Text('Mountain Series Summer 2024 collection is now on limited-time discount. Don\'t miss out!', style: TextStyle(color: Colors.grey.shade500, fontSize: 13, height: 1.4)),
                       actionButton: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6), decoration: BoxDecoration(color: const Color(0xFF0B1221), borderRadius: BorderRadius.circular(20)), child: const Text('Shop Deals', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold))),
                       time: '1h ago',
@@ -6745,7 +5383,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   _buildSectionTitle('Price Range', Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(8)),
-                    child: Text('\$${_priceRange.start.toInt()} Ã¢â‚¬â€ \$${_priceRange.end.toInt()}', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold))
+                    child: Text('\$${_priceRange.start.toInt()} â€” \$${_priceRange.end.toInt()}', style: TextStyle(color: const Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold))
                   )),
                   const SizedBox(height: 20),
                   SliderTheme(
@@ -7147,7 +5785,7 @@ class HelpSupportScreen extends StatelessWidget {
                       ]
                     ),
                     const SizedBox(height: 12),
-                    Text('Updated 2 hours ago Ã¢â‚¬Â¢ Assigned to Sarah M.', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    Text('Updated 2 hours ago â€¢ Assigned to Sarah M.', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
                   ]
                 )
               ),
@@ -7336,7 +5974,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                       ]
                     ),
                     const Spacer(),
-                    const Text('Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢   Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢   Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢   4242', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                    const Text('â€¢â€¢â€¢â€¢   â€¢â€¢â€¢â€¢   â€¢â€¢â€¢â€¢   4242', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
                     const Spacer(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -7381,7 +6019,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                       Container(width: 44, height: 44, decoration: BoxDecoration(color: Colors.cyan.shade50, shape: BoxShape.circle), alignment: Alignment.center, child: Text('VISA', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 11))),
                       'Visa ending in 4242', 
                       Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(10)), child: Text('Default', style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 9, fontWeight: FontWeight.bold))),
-                      'Expires 08/27 Ã¢â‚¬Â¢ Debit Card', 
+                      'Expires 08/27 â€¢ Debit Card', 
                       Icon(Icons.more_vert, color: Colors.grey.shade400)
                     ),
                     Divider(height: 1, color: Colors.grey.shade100, indent: 70),
@@ -7402,7 +6040,7 @@ class PaymentMethodsScreen extends StatelessWidget {
                       ),
                       'Mastercard ending in 8831', 
                       null,
-                      'Expires 11/26 Ã¢â‚¬Â¢ Credit Card', 
+                      'Expires 11/26 â€¢ Credit Card', 
                       Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(20)), child: Text('Set\nDefault', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600, fontSize: 10, fontWeight: FontWeight.bold, height: 1.2)))
                     ),
                     Divider(height: 1, color: Colors.grey.shade100, indent: 70),
@@ -7717,7 +6355,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                     children: [
                       const Text('My Orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 2),
-                      Text('CESC Ã¢â‚¬Â¢ GOLD VIP', style: TextStyle(fontSize: 10, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      Text('CESC â€¢ GOLD VIP', style: TextStyle(fontSize: 10, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     ],
                   ),
                   Container(
@@ -7868,7 +6506,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   children: [
                     const Text('Denim Classic Jacket', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
-                    Text('Size: L Ã¢â‚¬Â¢ Indigo Blue', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    Text('Size: L â€¢ Indigo Blue', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
                     const SizedBox(height: 4),
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('\$30.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text('Qty: 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.bold))])
                   ],
@@ -7950,7 +6588,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
               children: [
                 Row(
                   children: [
-                    Container(width: 28, height: 28, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.orange.shade100, shape: BoxShape.circle), child: const Text('Ã°Å¸â€ºÂµ', style: TextStyle(fontSize: 12))),
+                    Container(width: 28, height: 28, alignment: Alignment.center, decoration: BoxDecoration(color: Colors.orange.shade100, shape: BoxShape.circle), child: const Text('ðŸ›µ', style: TextStyle(fontSize: 12))),
                     const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -7977,7 +6615,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   children: [
                     const Text('Cargo Utility Pants', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
-                    Text('Size: 32 Ã¢â‚¬Â¢ Olive Green', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    Text('Size: 32 â€¢ Olive Green', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
                     const SizedBox(height: 4),
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('\$30.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text('Qty: 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.bold))])
                   ],
@@ -8045,7 +6683,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   children: [
                     const Text('Botanical Casual Shirt', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
-                    Text('Size: L Ã¢â‚¬Â¢ Floral Hawaii Print', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
+                    Text('Size: L â€¢ Floral Hawaii Print', style: TextStyle(color: Colors.grey.shade400, fontSize: 11)),
                     const SizedBox(height: 4),
                     Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('\$40.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), Text('Qty: 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.bold))])
                   ],
@@ -8166,7 +6804,7 @@ class OrderTrackingScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(20)),
-                            child: const Text('ORDER #ORD-9284 Ã¯Â¿Â½ Standard Shipping', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold)),
+                            child: const Text('ORDER #ORD-9284 ï¿½ Standard Shipping', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                           const Row(
                             children: [
@@ -8365,11 +7003,11 @@ class OrderTrackingScreen extends StatelessWidget {
                                 children: [
                                   const Text('Denim Classic Jacket', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                                   const SizedBox(height: 2),
-                                  Text('Size L Ã¯Â¿Â½ Indigo Blue Ã¯Â¿Â½ Qty 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                  Text('Size L ï¿½ Indigo Blue ï¿½ Qty 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
                                 ],
                               ),
                             ),
-                            const Text('\$15.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           ],
                         )
                       ),
@@ -8386,11 +7024,11 @@ class OrderTrackingScreen extends StatelessWidget {
                                 children: [
                                   const Text('Basic Eco-Cotton T-Shirt', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                                   const SizedBox(height: 2),
-                                  Text('Size M Ã¯Â¿Â½ Chalk White Ã¯Â¿Â½ Qty 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                  Text('Size M ï¿½ Chalk White ï¿½ Qty 1', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
                                 ],
                               ),
                             ),
-                            const Text('\$15.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                           ],
                         )
                       ),
@@ -8399,7 +7037,7 @@ class OrderTrackingScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Total Paid (Tax & Shipping incl.)', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-                          const Text('\$15.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         ],
                       ),
                       const SizedBox(height: 40),
@@ -8570,7 +7208,7 @@ class OrderTrackingLiveScreen extends StatelessWidget {
                               children: [
                                 Icon(Icons.circle, color: Colors.green, size: 8),
                                 SizedBox(width: 6),
-                                Text('ORDER #ORD-8910 Ã¯Â¿Â½ EXPRESS', style: TextStyle(color: Colors.black87, fontSize: 10, fontWeight: FontWeight.bold)),
+                                Text('ORDER #ORD-8910 ï¿½ EXPRESS', style: TextStyle(color: Colors.black87, fontSize: 10, fontWeight: FontWeight.bold)),
                               ],
                             )
                           ),
@@ -8608,7 +7246,7 @@ class OrderTrackingLiveScreen extends StatelessWidget {
                                     const SizedBox(width: 6),
                                     const Text('Arriving in ~25 mins', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                                     const SizedBox(width: 6),
-                                    Text('Ã¯Â¿Â½ 1.8 mi away', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                    Text('ï¿½ 1.8 mi away', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
                                   ],
                                 ),
                               ),
@@ -8690,7 +7328,7 @@ class OrderTrackingLiveScreen extends StatelessWidget {
                                         ],
                                       ),
                                       const SizedBox(height: 2),
-                                      Text('Honda PCX160 Ã¯Â¿Â½ CA8K...', style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
+                                      Text('Honda PCX160 ï¿½ CA8K...', style: TextStyle(color: Colors.grey.shade600, fontSize: 11)),
                                     ],
                                   ),
                                 ),
@@ -8745,8 +7383,8 @@ class OrderTrackingLiveScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 20),
                             
-                            _buildExpressTimeline(true, Icons.check, Colors.green, 'Order Packed & Prepared', 'Pacific Distribution Hub Ã¯Â¿Â½ 9:15 AM', false),
-                            _buildExpressTimeline(true, Icons.check, Colors.green, 'Courier Picked Up', 'Dave Miller on route Ã¯Â¿Â½ 9:32 AM', false),
+                            _buildExpressTimeline(true, Icons.check, Colors.green, 'Order Packed & Prepared', 'Pacific Distribution Hub ï¿½ 9:15 AM', false),
+                            _buildExpressTimeline(true, Icons.check, Colors.green, 'Courier Picked Up', 'Dave Miller on route ï¿½ 9:32 AM', false),
                             _buildExpressTimeline(true, Icons.circle, const Color(0xFF00BCD4), 'Out for Delivery', 'Navigating Evergreen Terr. toward 123 Main St.', true, isCurrent: true),
                             _buildExpressTimeline(false, Icons.circle, Colors.grey.shade300, 'Delivered & Handed Over', 'Expected by 10:05 AM', false, isLast: true),
                             
@@ -8762,11 +7400,11 @@ class OrderTrackingLiveScreen extends StatelessWidget {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         const Text('Cargo Utility Pants', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                                        Text('Size 32 Ã¯Â¿Â½ Olive Green', style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
+                                        Text('Size 32 ï¿½ Olive Green', style: TextStyle(color: Colors.grey.shade500, fontSize: 10)),
                                       ],
                                     ),
                                   ),
-                                  const Text('\$15.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                                 ],
                               )
                             )
@@ -8946,7 +7584,7 @@ class WriteReviewScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Write a Review', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text('ORDER #ORD-7741 Ã¯Â¿Â½ DELIVERED', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                        Text('ORDER #ORD-7741 ï¿½ DELIVERED', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
                       ],
                     ),
                   ),
@@ -8972,9 +7610,9 @@ class WriteReviewScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Botanical Casual Shirt', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), const Text('\$15.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))]),
+                                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('Botanical Casual Shirt', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)), const Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))]),
                                   const SizedBox(height: 2),
-                                  Text('Size: L Ã¯Â¿Â½ Floral Hawaii Print', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                  Text('Size: L ï¿½ Floral Hawaii Print', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
                                   const SizedBox(height: 6),
                                   Row(children: [const Icon(Icons.check_circle, color: Colors.green, size: 12), const SizedBox(width: 4), Text('Delivered on Oct 12, 2024', style: TextStyle(color: Colors.grey.shade600, fontSize: 10, fontWeight: FontWeight.bold))])
                                 ],
@@ -9010,7 +7648,7 @@ class WriteReviewScreen extends StatelessWidget {
                                 children: [
                                   Icon(Icons.verified, color: Color(0xFF0F8A9E), size: 14),
                                   SizedBox(width: 6),
-                                  Text('5.0 Ã¯Â¿Â½ Excellent! Highly recommended', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold)),
+                                  Text('5.0 ï¿½ Excellent! Highly recommended', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 12, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             )
@@ -9197,7 +7835,7 @@ class WriteReviewScreen extends StatelessWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Text('Courier & Delivery', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                                      Text('Aura Express Ã¯Â¿Â½ 2-Day Priority', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                      Text('Aura Express ï¿½ 2-Day Priority', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
                                     ],
                                   ),
                                 ),
@@ -9353,7 +7991,7 @@ class CustomerSupportChatScreen extends StatelessWidget {
                                   Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
                                   const SizedBox(width: 4),
                                   const Text('Online', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold)),
-                                  Text(' ï¿½ Replies <1m', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                                  Text(' � Replies <1m', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
                                 ],
                               )
                             ],
@@ -9394,7 +8032,7 @@ class CustomerSupportChatScreen extends StatelessWidget {
                             Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: const Color(0xFF00B4D8).withOpacity(0.15), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF0096C7), size: 14)),
                             const SizedBox(width: 10),
                             const Text('Order #ORD-9284', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                            const Text(' ï¿½ ', style: TextStyle(color: Colors.grey)),
+                            const Text(' � ', style: TextStyle(color: Colors.grey)),
                             const Text('In Transit (Denim Jacket)', style: TextStyle(color: Color(0xFF00838F), fontSize: 12, fontWeight: FontWeight.w600)),
                           ],
                         ),
@@ -9573,8 +8211,8 @@ class CustomerSupportChatScreen extends StatelessWidget {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Denim Classic Jacket', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), Text('\$15.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]),
-                                              const Text('Size L ï¿½ Indigo Blue', style: TextStyle(color: Colors.black54, fontSize: 11)),
+                                              const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Denim Classic Jacket', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), Text('\.00', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]),
+                                              const Text('Size L � Indigo Blue', style: TextStyle(color: Colors.black54, fontSize: 11)),
                                               const SizedBox(height: 4),
                                               Row(children: [const Icon(Icons.two_wheeler, color: Colors.lightBlue, size: 12), const SizedBox(width: 4), Text('Arriving Today, ~2:30 PM', style: TextStyle(color: Colors.lightBlue.shade700, fontSize: 10, fontWeight: FontWeight.bold))])
                                             ],
@@ -9730,18 +8368,3 @@ class CustomerSupportChatScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
