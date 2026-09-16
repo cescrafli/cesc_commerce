@@ -19,6 +19,11 @@ void main() async {
 // ----------------------------------------------------------------------
 final ValueNotifier<List<Map<String, dynamic>>> globalCart = ValueNotifier([]);
 final ValueNotifier<List<Map<String, dynamic>>> globalWishlist = ValueNotifier([]);
+final ValueNotifier<List<Map<String, dynamic>>> globalNotifications = ValueNotifier([
+  {'id': 1, 'title': 'Flash Sale: Summer Collection', 'body': 'Get up to 50% off on all summer items today! Limited time offer.', 'isRead': false, 'image': 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'},
+  {'id': 2, 'title': 'New Arrival: Urban Fashion 2.0', 'body': 'Check out our latest streetwear arrivals exclusive for members.', 'isRead': false, 'image': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'},
+  {'id': 3, 'title': 'Limited Edition Release', 'body': 'Winter Coat Premium Collection is out now. Buy 1 Get 1 Free while stocks last!', 'isRead': false, 'image': 'https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'},
+]);
 
 void toggleWishlist(String title, String subtitle, String price, String imageUrl, BuildContext context) {
   final current = List<Map<String, dynamic>>.from(globalWishlist.value);
@@ -490,7 +495,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = false);
     
     if (user != null) {
-      if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()));
+      if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()), (route) => false);
     } else {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Login failed. Check credentials.')));
     }
@@ -716,7 +721,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       setState(() => _isLoading = false);
       if (user != null) {
         // user created successfully
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()));
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const MainNavigationScreen()), (route) => false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign Up Failed. Check your email format or try again.')));
       }
@@ -1231,24 +1236,9 @@ class _PromoCarouselState extends State<PromoCarousel> {
   int _currentPage = 0;
 
   final List<Map<String, String>> promos = [
-    {
-      'tag': 'SUMMER 2024',
-      'title': 'Eco-Collection\nMountain Series',
-      'subtitle': 'Up to 40% OFF this week',
-      'image': 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      'tag': 'NEW ARRIVAL',
-      'title': 'Urban Street\nFashion 2.0',
-      'subtitle': 'Exclusive for members',
-      'image': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-    },
-    {
-      'tag': 'LIMITED EDITION',
-      'title': 'Winter Coat\nPremium Collection',
-      'subtitle': 'Buy 1 Get 1 Free',
-      'image': 'https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-    }
+    {'title': 'Summer Collection Discount', 'subtitle': 'Up to 50% Off', 'tag': 'PROMO', 'image': 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'},
+    {'title': 'Urban Fashion Arrivals', 'subtitle': 'Discover new styles', 'tag': 'NEW', 'image': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'},
+    {'title': 'Premium Winter Coats', 'subtitle': 'Buy 1 Get 1 Free', 'tag': 'HOT', 'image': 'https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'},
   ];
 
   @override
@@ -1256,25 +1246,24 @@ class _PromoCarouselState extends State<PromoCarousel> {
     super.initState();
     _pageController = PageController(initialPage: 0);
     _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
-      if (_currentPage < promos.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
+      if (!mounted) return;
+      setState(() {
+        if (_currentPage < promos.length - 1) {
+          _currentPage++;
+        } else {
+          _currentPage = 0;
+        }
+      });
       if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-        );
+        _pageController.animateToPage(_currentPage, duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
       }
     });
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
     _timer?.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -1283,7 +1272,7 @@ class _PromoCarouselState extends State<PromoCarousel> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       child: SizedBox(
-        height: 180,
+        height: 200,
         child: PageView.builder(
           controller: _pageController,
           onPageChanged: (int page) {
@@ -1296,7 +1285,7 @@ class _PromoCarouselState extends State<PromoCarousel> {
             final promo = promos[index];
             return GestureDetector(
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailScreen(title: promo['title']!.replaceAll('\n', ' '), price: 'Promo', imageUrl: promo['image']!)));
+                Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailScreen(title: promo['title']!.replaceAll(' ', ' '), price: 'Promo', imageUrl: promo['image']!)));
               },
               child: Container(
                 margin: const EdgeInsets.only(right: 8),
@@ -1304,46 +1293,49 @@ class _PromoCarouselState extends State<PromoCarousel> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   image: DecorationImage(image: NetworkImage(promo['image']!), fit: BoxFit.cover),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 5))],
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
                 ),
                 child: Container(
                   padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent], begin: Alignment.centerLeft, end: Alignment.centerRight)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(20)), child: Text(promo['tag']!, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
-                      const SizedBox(height: 12),
-                      Text(promo['title']!, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, height: 1.2)),
-                      const SizedBox(height: 8),
-                      Text(promo['subtitle']!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                      const Spacer(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                            child: const Row(children: [Text('Shop Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), SizedBox(width: 4), Icon(Icons.arrow_forward, size: 14)]),
-                          ),
-                          Row(
-                            children: List.generate(promos.length, (dotIndex) {
-                              return Container(
-                                margin: const EdgeInsets.only(left: 4),
-                                width: _currentPage == dotIndex ? 16 : 4,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: _currentPage == dotIndex ? Theme.of(context).primaryColor : Colors.white54,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              );
-                            }),
-                          )
-                        ],
-                      )
-                    ],
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(colors: [Colors.black.withOpacity(0.7), Colors.transparent], begin: Alignment.centerLeft, end: Alignment.centerRight)),
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(20)), child: Text(promo['tag']!, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
+                        const SizedBox(height: 12),
+                        Text(promo['title']!, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, height: 1.2)),
+                        const SizedBox(height: 8),
+                        Text(promo['subtitle']!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                              child: const Row(children: [Text('Shop Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), SizedBox(width: 4), Icon(Icons.arrow_forward, size: 14)]),
+                            ),
+                            Row(
+                              children: List.generate(promos.length, (dotIndex) {
+                                return Container(
+                                  margin: const EdgeInsets.only(left: 4),
+                                  width: _currentPage == dotIndex ? 16 : 4,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: _currentPage == dotIndex ? Theme.of(context).primaryColor : Colors.white54,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                );
+                              }),
+                            )
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1398,16 +1390,22 @@ class HomeScreen extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('You have no new notifications'), duration: Duration(seconds: 1)));
-                          },
-                          child: Stack(
-                            children: [
-                              Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle), child: const Icon(Icons.notifications_none, size: 22, color: Colors.black87)),
-                              Positioned(top: 10, right: 10, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle))),
-                            ],
-                          ),
+                        ValueListenableBuilder<List<Map<String, dynamic>>>(
+                          valueListenable: globalNotifications,
+                          builder: (context, notifs, _) {
+                            final hasUnread = notifs.any((n) => n['isRead'] == false);
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen()));
+                              },
+                              child: Stack(
+                                children: [
+                                  Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle), child: const Icon(Icons.notifications_none, size: 22, color: Colors.black87)),
+                                  if (hasUnread) Positioned(top: 10, right: 10, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle))),
+                                ],
+                              ),
+                            );
+                          }
                         ),
                         const SizedBox(width: 12),
                         GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())), child: const CircleAvatar(radius: 22, backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'))),
@@ -1534,14 +1532,16 @@ class CartScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: () { if (Navigator.canPop(context)) Navigator.pop(context); },
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
-                      child: const Icon(Icons.arrow_back_ios_new, size: 18),
-                    ),
-                  ),
+                  Navigator.canPop(context) 
+                    ? GestureDetector(
+                        onTap: () { if (Navigator.canPop(context)) Navigator.pop(context); },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                          child: const Icon(Icons.arrow_back_ios_new, size: 18),
+                        ),
+                      )
+                    : const SizedBox(width: 40),
                   const Text('My Cart', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   Container(
                     padding: const EdgeInsets.all(10),
@@ -1561,7 +1561,12 @@ class CartScreen extends StatelessWidget {
                   }
 
                   double totalPrice = 0;
-                  for (var item in cartItems) { totalPrice += (item['price'] as double) * (item['qty'] as int); }
+                  for (var item in cartItems) { 
+                    double p = 0.0;
+                    if (item['price'] is String) { p = double.tryParse(item['price'].toString().replaceAll('\$', '').trim()) ?? 0.0; } 
+                    else if (item['price'] is num) { p = (item['price'] as num).toDouble(); }
+                    totalPrice += p * (item['qty'] as int); 
+                  }
 
                   return Column(
                     children: [
@@ -1735,7 +1740,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCartItem(BuildContext context, int index, String title, String subtitle, double price, int qty, String img) {
+  Widget _buildCartItem(BuildContext context, int index, String title, String subtitle, dynamic priceRaw, int qty, String img) { double price = 0.0; if (priceRaw is String) { price = double.tryParse(priceRaw.toString().replaceAll('\$', '').trim()) ?? 0.0; } else if (priceRaw is num) { price = priceRaw.toDouble(); }
     return Container(
       margin: const EdgeInsets.only(bottom: 15), padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
@@ -2514,7 +2519,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         const Text('Delivery Address', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(width: 10),
                         Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.cyan.shade50, borderRadius: BorderRadius.circular(4)), child: const Text('DEFAULT', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
-                        const Spacer(),
+                        const SizedBox(height: 10),
                         GestureDetector(
                           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddressScreen())),
                           child: const Text('Change', style: TextStyle(color: Color(0xFF0F8A9E), fontSize: 13, fontWeight: FontWeight.bold)),
@@ -3706,7 +3711,7 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                   children: [
                     // Map Area
                     Container(
-                      height: 180,
+                      height: 220,
                       decoration: BoxDecoration(
                         color: Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(20),
@@ -4115,7 +4120,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                   children: [
                     // Map Area
                     Container(
-                      height: 180,
+                      height: 220,
                       decoration: BoxDecoration(
                         color: Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(20),
@@ -4927,7 +4932,7 @@ class _AddNewCardScreenState extends State<AddNewCardScreen> {
                     const SizedBox(height: 20),
                     // Credit Card UI
                     Container(
-                      height: 200, width: double.infinity,
+                      height: 220, width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
@@ -5804,10 +5809,11 @@ class CategoryListScreen extends StatefulWidget {
 class _CategoryListScreenState extends State<CategoryListScreen> {
   int _selectedCategoryIndex = 0;
   int _selectedChipIndex = 0;
+  String _searchQuery = '';
 
-  final categories = ['T-Shirts', 'Shirts', 'Pants', 'Jackets', 'Shoes', 'Hats', 'Socks', 'Watches', 'Bags']; 
-  final itemsCount = [148, 92, 85, 64, 110, 42, 38, 57, 73];
-  final icons = [
+  final allCategories = ['T-Shirts', 'Shirts', 'Pants', 'Jackets', 'Shoes', 'Hats', 'Socks', 'Watches', 'Bags']; 
+  final allItemsCount = [148, 92, 85, 64, 110, 42, 38, 57, 73];
+  final allIcons = [
     'assets/images/categories/tshirt.png',
     'assets/images/categories/shirt.png',
     'assets/images/categories/pants.png',
@@ -5819,12 +5825,25 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     'assets/images/categories/bag.png',
   ]; 
 
-  final chips = ['All (12)', 'Apparel', 'Footwear', 'Accessories'];
+  final chips = ['All (9)', 'Apparel', 'Footwear', 'Accessories'];
 
   @override
   Widget build(BuildContext context) {
+    // Filter logic
+    List<int> filteredIndices = [];
+    for (int i = 0; i < allCategories.length; i++) {
+      bool matchesSearch = allCategories[i].toLowerCase().contains(_searchQuery.toLowerCase());
+      bool matchesChip = false;
+      if (_selectedChipIndex == 0) matchesChip = true;
+      else if (_selectedChipIndex == 1 && ['T-Shirts', 'Shirts', 'Pants', 'Jackets', 'Socks'].contains(allCategories[i])) matchesChip = true;
+      else if (_selectedChipIndex == 2 && ['Shoes'].contains(allCategories[i])) matchesChip = true;
+      else if (_selectedChipIndex == 3 && ['Hats', 'Watches', 'Bags'].contains(allCategories[i])) matchesChip = true;
+      
+      if (matchesSearch && matchesChip) filteredIndices.add(i);
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA), // Light greyish background
+      backgroundColor: const Color(0xFFF7F8FA),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -5848,13 +5867,29 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                       children: [
                         const Text('Choose a Category', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text('Explore 12 vibrant styles', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                        Text('Explore 9 vibrant styles', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
                       ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                      child: const Icon(Icons.notifications_none, size: 20),
+                    ValueListenableBuilder<List<Map<String, dynamic>>>(
+                      valueListenable: globalNotifications,
+                      builder: (context, notifs, _) {
+                        final hasUnread = notifs.any((n) => n['isRead'] == false);
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationScreen()));
+                          },
+                          child: Stack(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                child: const Icon(Icons.notifications_none, size: 20),
+                              ),
+                              if (hasUnread) Positioned(top: 8, right: 8, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle))),
+                            ],
+                          ),
+                        );
+                      }
                     ),
                   ],
                 ),
@@ -5869,14 +5904,34 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                       child: Container(
                         height: 55, padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
-                        child: Row(children: [Icon(Icons.search, color: Colors.grey.shade400), const SizedBox(width: 10), Text('Search categories, items...', style: TextStyle(color: Colors.grey.shade400, fontSize: 13))]),
+                        child: Row(
+                          children: [
+                            Icon(Icons.search, color: Colors.grey.shade400), 
+                            const SizedBox(width: 10), 
+                            Expanded(
+                              child: TextField(
+                                onChanged: (val) => setState(() => _searchQuery = val),
+                                decoration: InputDecoration(
+                                  hintText: 'Search categories...',
+                                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            )
+                          ]
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Container(
-                      height: 55, width: 55,
-                      decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]),
-                      child: const Icon(Icons.tune, color: Colors.white),
+                    GestureDetector(
+                      onTap: () {
+                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Advanced filters coming soon!')));
+                      },
+                      child: Container(
+                        height: 55, width: 55,
+                        decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Theme.of(context).primaryColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]),
+                        child: const Icon(Icons.tune, color: Colors.white),
+                      ),
                     )
                   ],
                 ),
@@ -5918,7 +5973,12 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('MAIN COLLECTIONS', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                    Text('Select Multi', style: TextStyle(fontSize: 12, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                    GestureDetector(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Select Multi coming soon!')));
+                      },
+                      child: Text('Select Multi', style: TextStyle(fontSize: 12, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                    ),
                   ],
                 ),
               ),
@@ -5927,73 +5987,77 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
               // 5. Grid of Categories
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, crossAxisSpacing: 15, mainAxisSpacing: 25, childAspectRatio: 0.72
-                  ),
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    bool isSelected = _selectedCategoryIndex == index;
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() => _selectedCategoryIndex = index);
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryProductsScreen(categoryName: categories[index])));
-                      },
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: isSelected ? Colors.cyan.shade50 : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: isSelected ? Theme.of(context).primaryColor : Colors.white, width: isSelected ? 1.5 : 0),
-                              boxShadow: [if (!isSelected) BoxShadow(color: Colors.grey.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))]
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Spacer(flex: 2),
-                                // We use the existing circular icons as requested
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: Image.asset(icons[index], width: 45, height: 45, fit: BoxFit.cover),
+                child: filteredIndices.isEmpty 
+                  ? const Padding(padding: EdgeInsets.only(top: 50), child: Center(child: Text('No categories found', style: TextStyle(color: Colors.grey))))
+                  : GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3, crossAxisSpacing: 15, mainAxisSpacing: 25, childAspectRatio: 0.72
+                      ),
+                      itemCount: filteredIndices.length,
+                      itemBuilder: (context, idx) {
+                        int index = filteredIndices[idx];
+                        bool isSelected = _selectedCategoryIndex == index;
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() => _selectedCategoryIndex = index);
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryProductsScreen(categoryName: allCategories[index])));
+                          },
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: isSelected ? Colors.cyan.shade50 : Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: isSelected ? Theme.of(context).primaryColor : Colors.white, width: isSelected ? 1.5 : 0),
+                                  boxShadow: [if (!isSelected) BoxShadow(color: Colors.grey.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))]
                                 ),
-                                const Spacer(flex: 2),
-                                Text(categories[index], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                                const SizedBox(height: 4),
-                                Text('${itemsCount[index]} items', style: TextStyle(fontSize: 10, color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade500)),
-                                const Spacer(),
-                              ],
-                            ),
-                          ),
-                          if (isSelected)
-                            Positioned(
-                              top: -10, left: 0, right: 0,
-                              child: Center(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(10)),
-                                  child: const Text('POPULAR', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Spacer(flex: 2),
+                                    Container(
+                                      width: 45, height: 45,
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(color: Colors.grey.shade50, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade100)),
+                                      child: Image.asset(allIcons[index]),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(allCategories[index], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                    const SizedBox(height: 2),
+                                    Text(' items', style: TextStyle(color: Colors.grey.shade400, fontSize: 10)),
+                                    const Spacer(),
+                                  ],
                                 ),
                               ),
-                            )
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                              if (isSelected) Positioned(
+                                top: -10, left: 0, right: 0,
+                                child: Center(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(10)),
+                                    child: const Text('POPULAR', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      },
+                    ),
               ),
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-      ),
+              const SizedBox(height: 30),
+            ]
+          )
+        )
+      )
     );
   }
 }
+
 class CategoryProductsScreen extends StatelessWidget { final String categoryName; const CategoryProductsScreen({super.key, required this.categoryName}); @override Widget build(BuildContext context) { return Scaffold(appBar: AppBar(title: Text(categoryName, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), backgroundColor: Colors.white, elevation: 0, iconTheme: const IconThemeData(color: Colors.black)), body: GridView.builder(padding: const EdgeInsets.all(20), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 0.58), itemCount: 6, itemBuilder: (context, index) { return ProductCard(title: '$categoryName Item ${index + 1}', subtitle: 'Best Quality', price: '\$${(index+1)*12}.00', imageUrl: 'https://picsum.photos/seed/${index + 300}/300/400', rating: '4.${index%9}', reviews: '${index*12+5}', isFav: index%2==0); })); } }
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -6146,14 +6210,16 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GestureDetector(
-                          onTap: () { if (Navigator.canPop(context)) Navigator.pop(context); },
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
-                            child: const Icon(Icons.arrow_back_ios_new, size: 18),
-                          ),
+                        Navigator.canPop(context) 
+                    ? GestureDetector(
+                        onTap: () { if (Navigator.canPop(context)) Navigator.pop(context); },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                          child: const Icon(Icons.arrow_back_ios_new, size: 18),
                         ),
+                      )
+                    : const SizedBox(width: 40),
                         Column(
                           children: [
                             const Text('Favorites', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -6212,12 +6278,38 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                         const Text('All items in stock', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87)),
                       ],
                     ),
-                    Row(
-                      children: [
-                        Text('Move All to Cart', style: TextStyle(fontSize: 13, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_ios, size: 12, color: Theme.of(context).primaryColor),
-                      ],
+                    GestureDetector(
+                      onTap: () {
+                        if (filteredItems.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No items to move')));
+                          return;
+                        }
+                        final currentCart = List<Map<String, dynamic>>.from(globalCart.value);
+                        for (var item in filteredItems) {
+                           currentCart.add({
+                             'title': item['title'],
+                             'subtitle': item['subtitle'],
+                             'price': double.tryParse(item['price'].toString().replaceAll('\$', '').trim()) ?? 10.0,
+                             'image': item['image'] ?? item['imageUrl'] ?? 'https://picsum.photos/200',
+                             'qty': 1,
+                           });
+                        }
+                        globalCart.value = currentCart;
+                        
+                        // Optionally clear wishlist of these items
+                        final currentWishlist = List<Map<String, dynamic>>.from(globalWishlist.value);
+                        currentWishlist.removeWhere((w) => filteredItems.any((f) => f['title'] == w['title']));
+                        globalWishlist.value = currentWishlist;
+
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Moved all to Cart!')));
+                      },
+                      child: Row(
+                        children: [
+                          Text('Move All to Cart', style: TextStyle(fontSize: 13, color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 4),
+                          Icon(Icons.arrow_forward_ios, size: 12, color: Theme.of(context).primaryColor),
+                        ],
+                      ),
                     )
                   ],
                 ),
@@ -6284,14 +6376,16 @@ class ProfileScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    GestureDetector(
-                      onTap: () { if (Navigator.canPop(context)) Navigator.pop(context); },
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
-                        child: const Icon(Icons.arrow_back_ios_new, size: 18),
-                      ),
-                    ),
+                    Navigator.canPop(context) 
+                    ? GestureDetector(
+                        onTap: () { if (Navigator.canPop(context)) Navigator.pop(context); },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade200)),
+                          child: const Icon(Icons.arrow_back_ios_new, size: 18),
+                        ),
+                      )
+                    : const SizedBox(width: 40),
                     const Text('Account & Profile', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     Container(
                       padding: const EdgeInsets.all(10),
@@ -7299,7 +7393,7 @@ class PaymentMethodsScreen extends StatelessWidget {
 
               // Gradient Card
               Container(
-                height: 200,
+                height: 220,
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -7335,9 +7429,9 @@ class PaymentMethodsScreen extends StatelessWidget {
                          )
                       ]
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 10),
                     const Text('Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢   Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢   Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢   4242', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
-                    const Spacer(),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -9745,3 +9839,126 @@ class CustomerSupportChatScreen extends StatelessWidget {
 
 
 
+
+class NotificationScreen extends StatelessWidget {
+  const NotificationScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
+      appBar: AppBar(
+        title: const Text('Notifications', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+      body: ValueListenableBuilder<List<Map<String, dynamic>>>(
+        valueListenable: globalNotifications,
+        builder: (context, notifs, _) {
+          if (notifs.isEmpty) {
+            return const Center(child: Text('No notifications', style: TextStyle(color: Colors.black54)));
+          }
+          return ListView.builder(
+            itemCount: notifs.length,
+            itemBuilder: (context, index) {
+              final notif = notifs[index];
+              final bool isRead = notif['isRead'];
+              return GestureDetector(
+                onTap: () {
+                  // Mark as read
+                  final current = List<Map<String, dynamic>>.from(globalNotifications.value);
+                  current[index] = {...current[index], 'isRead': true};
+                  globalNotifications.value = current;
+                  
+                  // Navigate
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => NewsDetailScreen(news: notif)));
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: isRead ? Colors.white : const Color(0xFFF0FBFF),
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: isRead ? Colors.grey.shade200 : const Color(0xFF18C5DF).withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 50, height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          image: DecorationImage(image: NetworkImage(notif['image']), fit: BoxFit.cover)
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(notif['title'], style: TextStyle(fontWeight: isRead ? FontWeight.normal : FontWeight.bold, fontSize: 14)),
+                            const SizedBox(height: 4),
+                            Text(notif['body'], style: TextStyle(color: Colors.grey.shade600, fontSize: 12), maxLines: 2, overflow: TextOverflow.ellipsis),
+                          ],
+                        ),
+                      ),
+                      if (!isRead) Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF18C5DF), shape: BoxShape.circle))
+                    ],
+                  ),
+                ),
+              );
+            }
+          );
+        }
+      ),
+    );
+  }
+}
+
+class NewsDetailScreen extends StatelessWidget {
+  final Map<String, dynamic> news;
+  const NewsDetailScreen({super.key, required this.news});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.network(news['image'], width: double.infinity, height: 250, fit: BoxFit.cover),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(news['title'], style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 15),
+                  Text(news['body'], style: const TextStyle(fontSize: 14, height: 1.5, color: Colors.black87)),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25))),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Go Back', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
