@@ -1,0 +1,40 @@
+name: Build iOS (Tanpa Mac)
+
+# Ini akan berjalan otomatis saat Anda menekan tombol di GitHub
+on: 
+  workflow_dispatch: 
+
+jobs:
+  build:
+    name: Build iOS IPA
+    # Menggunakan OS Mac buatan GitHub
+    runs-on: macos-latest
+
+    steps:
+      - name: 📥 Clone Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: 📦 Install Dependencies
+        run: flutter pub get
+
+      - name: 🍏 Build iOS (Unsigned)
+        # Kita build tanpa sertifikat digital karena tidak punya akun developer
+        run: flutter build ios --release --no-codesign
+
+      - name: 🗜️ Pack into .ipa file
+        # Mengubah file .app menjadi .ipa agar bisa diunduh
+        run: |
+          mkdir -p Payload
+          mv build/ios/iphoneos/Runner.app Payload/
+          zip -qr cesc_commerce.ipa Payload
+
+      - name: 📤 Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CescCommerce-iOS
+          path: cesc_commerce.ipa
