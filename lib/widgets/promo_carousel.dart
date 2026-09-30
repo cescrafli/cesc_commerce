@@ -1,0 +1,129 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cesc_commerce/core/globals.dart';
+import 'package:cesc_commerce/screens.dart';
+import 'package:cesc_commerce/widgets.dart';
+
+class PromoCarousel extends StatefulWidget {
+  const PromoCarousel({super.key});
+  @override
+  State<PromoCarousel> createState() => _PromoCarouselState();
+}
+
+class _PromoCarouselState extends State<PromoCarousel> {
+  late PageController _pageController;
+  Timer? _timer;
+  int _currentPage = 0;
+
+  final List<Map<String, String>> promos = [
+    {'title': 'Summer Collection Discount', 'subtitle': 'Up to 50% Off', 'tag': 'PROMO', 'image': 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'},
+    {'title': 'Urban Fashion Arrivals', 'subtitle': 'Discover new styles', 'tag': 'NEW', 'image': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'},
+    {'title': 'Premium Winter Coats', 'subtitle': 'Buy 1 Get 1 Free', 'tag': 'HOT', 'image': 'https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 0);
+    _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+      if (!mounted) return;
+      setState(() {
+        if (_currentPage < promos.length - 1) {
+          _currentPage++;
+        } else {
+          _currentPage = 0;
+        }
+      });
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(_currentPage, duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      child: SizedBox(
+        height: 200,
+        child: PageView.builder(
+          controller: _pageController,
+          onPageChanged: (int page) {
+            setState(() {
+              _currentPage = page;
+            });
+          },
+          itemCount: promos.length,
+          itemBuilder: (context, index) {
+            final promo = promos[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailScreen(product: {'id': 'promo_${index}', 'title': promo['title'], 'subtitle': 'Promo Deal', 'price': 10.0, 'category': 'Promo', 'brand': 'Promo', 'image': promo['image'], 'rating': 5.0, 'reviews': 99})));
+              },
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  image: DecorationImage(image: NetworkImage(promo['image']!), fit: BoxFit.cover),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))],
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(24), gradient: LinearGradient(colors: [Colors.black.withOpacity(0.7), Colors.transparent], begin: Alignment.centerLeft, end: Alignment.centerRight)),
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(20)), child: Text(promo['tag']!, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))),
+                        const SizedBox(height: 12),
+                        Text(promo['title']!, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, height: 1.2)),
+                        const SizedBox(height: 8),
+                        Text(promo['subtitle']!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                              child: const Row(children: [Text('Shop Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), SizedBox(width: 4), Icon(Icons.arrow_forward, size: 14)]),
+                            ),
+                            Row(
+                              children: List.generate(promos.length, (dotIndex) {
+                                return Container(
+                                  margin: const EdgeInsets.only(left: 4),
+                                  width: _currentPage == dotIndex ? 16 : 4,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: _currentPage == dotIndex ? Theme.of(context).primaryColor : Colors.white54,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                );
+                              }),
+                            )
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
